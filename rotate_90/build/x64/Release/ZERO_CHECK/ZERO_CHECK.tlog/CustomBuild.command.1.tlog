@@ -1,0 +1,10 @@
+^E:\C++_TEST\C++\ROTATE_90\BUILD\CMAKEFILES\BD31BD8A0F25627E43DF23B3209D73DC\GENERATE.STAMP.RULE
+setlocal
+D:\cmake\bin\cmake.exe -SE:/C++_Test/C++/rotate_90 -BE:/C++_Test/C++/rotate_90/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/C++_Test/C++/rotate_90/build/Text-3.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
