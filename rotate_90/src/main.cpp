@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <chrono>
+#include <thread>
 
 #pragma pack(push, 1)
 struct BMPHeader {
@@ -33,6 +34,21 @@ struct RGBQuad {
 	uint8_t reserved;
 };
 #pragma pack(pop)
+
+const int NUM_THREADS = 8;
+
+void processBlock(int startRow, int endRow, int startCol, int endCol,
+	const std::vector<std::vector<uint8_t>>& pixels,
+	std::vector<std::vector<uint8_t>>& rotatedPixels,
+	int height, int width) {
+	for (int i = startRow; i < endRow; ++i) {
+		for (int j = startCol; j < endCol; ++j) {
+			int x = j;
+			int y = height - 1 - i;
+			rotatedPixels[j][i] = pixels[y][x];
+		}
+	}
+}
 
 void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::ifstream inFile(inputFile, std::ios::binary);
@@ -82,10 +98,93 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	auto start_rotate = std::chrono::high_resolution_clock::now();
 
 	std::vector<std::vector<uint8_t>> rotatedPixels(width, std::vector<uint8_t>(height));
+	//for (int i = 0; i < height; ++i) {
+	//	for (int j = 0; j < width; ++j) {
+	//		rotatedPixels[j][height - 1 - i] = pixels[i][j];
+	//	}
+	//}
+
+	//Bilinear interpolation
+	//for (int i = 0; i < height; ++i) {
+	//	for (int j = 0; j < width; ++j) {
+	//		float x = j;
+	//		float y = height - 1 - i;
+	//		int x0 = static_cast<int>(floor(x));
+	//		int y0 = static_cast<int>(floor(y));
+	//		int x1 = x0 + 1;
+	//		int y1 = y0 + 1;
+	//		float u = x - x0;
+	//		float v = y - y0;
+
+	//		if (x0 < 0) x0 = 0;
+	//		if (y0 < 0) y0 = 0;
+	//		if (x1 >= width) x1 = width - 1;
+	//		if (y1 >= height) y1 = height - 1;
+
+	//		rotatedPixels[j][i] =
+	//			(1 - u) * (1 - v) * pixels[y0][x0] +
+	//			u * (1 - v) * pixels[y0][x1] +
+	//			(1 - u) * v * pixels[y1][x0] +
+	//			u * v * pixels[y1][x1];
+	//	}
+	//}
+
+	//Nearest neighbor interpolation
+	//for (int i = 0; i < height; ++i) {
+	//	for (int j = 0; j < width; ++j) {
+	//		int x = j;
+	//		int y = height - 1 - i;
+
+	//		if (x < 0 || x >= width || y < 0 || y >= height) {
+	//			rotatedPixels[j][i] = 0; 
+	//		}
+	//		else {
+	//			rotatedPixels[j][i] = pixels[y][x];
+	//		}
+	//	}
+	//}
+
+	//Nearest neighbor interpolation 2
+
+	/*int minX = 0, maxX = width - 1;
+	int minY = 0, maxY = height - 1;
+
 	for (int i = 0; i < height; ++i) {
-		for (int j = 0; j < width; ++j) {
-			rotatedPixels[j][height - 1 - i] = pixels[i][j];
+		int y = height - 1 - i;
+		if (y < minY) minY = y;
+		if (y > maxY) maxY = y;
+	}
+
+	for (int j = 0; j < width; ++j) {
+		if (j < minX) minX = j;
+		if (j > maxX) maxX = j;
+	}
+
+	for (int i = minY; i <= maxY; ++i) {
+		for (int j = minX; j <= maxX; ++j) {
+			int x = j;
+			int y = height - 1 - i;
+			rotatedPixels[j][i] = pixels[y][x];
 		}
+	}*/
+
+	// Nearest neighbor interpolation multi-threaded block processing
+	int height1 = infoHeader.height;
+	int width1 = infoHeader.width;
+	std::vector<std::vector<uint8_t>> rotatedPixels1(width1, std::vector<uint8_t>(height1));
+
+	int blockRows = height / NUM_THREADS;
+	int blockCols = width;
+
+	std::vector<std::thread> threads;
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		int startRow = i * blockRows;
+		int endRow = (i == NUM_THREADS - 1) ? height : startRow + blockRows;
+		threads.emplace_back(processBlock, startRow, endRow, 0, blockCols, std::ref(pixels), std::ref(rotatedPixels), height, width);
+	}
+
+	for (auto& thread : threads) {
+		thread.join();
 	}
 
 	auto end_rotate = std::chrono::high_resolution_clock::now();
@@ -130,7 +229,7 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	rotateBMP8bit("2_53.bmp", "output.bmp");
+	rotateBMP8bit("20.bmp", "output.bmp");
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration = end - start;
