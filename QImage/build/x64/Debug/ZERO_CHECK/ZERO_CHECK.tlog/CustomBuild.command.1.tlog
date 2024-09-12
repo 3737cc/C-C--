@@ -1,0 +1,10 @@
+^E:\C++_TEST\QIMAGE\BUILD\CMAKEFILES\9A4DE3E2CEDD67E5FCC3A6BABE8A33B1\GENERATE.STAMP.RULE
+setlocal
+D:\cmake\bin\cmake.exe -SE:/C++_Test/QImage -BE:/C++_Test/QImage/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/C++_Test/QImage/build/qimageRotate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

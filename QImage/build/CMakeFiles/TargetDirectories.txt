@@ -1,0 +1,4 @@
+E:/C++_Test/QImage/build/CMakeFiles/GUI.dir
+E:/C++_Test/QImage/build/CMakeFiles/INSTALL.dir
+E:/C++_Test/QImage/build/CMakeFiles/ALL_BUILD.dir
+E:/C++_Test/QImage/build/CMakeFiles/ZERO_CHECK.dir

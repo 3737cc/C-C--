@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.30.3)
+project(qimageRotate VERSION 1.0)
+
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+
+set(PROJECT_SOURCES
+    src/main.cpp
+    # 其他源文件和头文件
+)
+
+add_executable(GUI ${PROJECT_SOURCES})
+
+target_link_libraries(GUI Qt5::Core Qt5::Gui Qt5::Widgets)
+
+# 设置目标属性
+set_target_properties(GUI PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.GUI
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    WIN32_EXECUTABLE TRUE
+)
+
+include(GNUInstallDirs)
+install(TARGETS GUI
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
