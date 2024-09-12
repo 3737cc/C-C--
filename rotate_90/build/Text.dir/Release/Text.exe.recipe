@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>E:\C++_Test\C++\rotate_90\build\x64\Release\ZERO_CHECK</FullPath>
+      <FullPath>E:\C++_Test\C-C--\rotate_90\build\x64\Release\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>E:\C++_Test\C++\rotate_90\build\Release\Text.exe</FullPath>
+      <FullPath>E:\C++_Test\C-C--\rotate_90\build\Release\Text.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

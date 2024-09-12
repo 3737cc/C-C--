@@ -3,6 +3,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <future>
+#include <algorithm>
 
 #pragma pack(push, 1)
 struct BMPHeader {
@@ -34,21 +36,120 @@ struct RGBQuad {
 	uint8_t reserved;
 };
 #pragma pack(pop)
-
-const int NUM_THREADS = 8;
-
 void processBlock(int startRow, int endRow, int startCol, int endCol,
-	const std::vector<std::vector<uint8_t>>& pixels,
-	std::vector<std::vector<uint8_t>>& rotatedPixels,
+	const std::vector<uint8_t>& pixels,
+	std::vector<uint8_t>& rotatedPixels,
 	int height, int width) {
+	int rotatedWidth = height;
+	int rotatedHeight = width;
+
 	for (int i = startRow; i < endRow; ++i) {
 		for (int j = startCol; j < endCol; ++j) {
-			int x = j;
-			int y = height - 1 - i;
-			rotatedPixels[j][i] = pixels[y][x];
+			int srcIndex = i * rotatedHeight + j;
+			int destIndex = (rotatedHeight - 1 - j) * rotatedWidth + i;
+			rotatedPixels[destIndex] = pixels[srcIndex];
 		}
 	}
 }
+
+
+
+//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//	const std::vector<uint8_t>& pixels,
+//	std::vector<uint8_t>& rotatedPixels,
+//	int height, int width) {
+//	int widthBytes = width * sizeof(uint8_t);
+//	for (int i = startRow; i < endRow; ++i) {
+//		int srcRow = i;
+//		int srcRowStart = srcRow * widthBytes;
+//
+//		for (int j = startCol; j < endCol; ++j) {
+//			int srcCol = j;
+//			int srcIndex = srcRowStart + srcCol;
+//
+//			// 计算旋转后的目标位置
+//			int destRow = srcCol;
+//			int destCol = width - 1 - srcRow;
+//			int destRowStart = destRow * height;
+//
+//			int destIndex = destRowStart + destCol;
+//			rotatedPixels[destIndex] = pixels[srcIndex];
+//		}
+//	}
+//}
+
+////分块两层嵌套
+//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//	const std::vector<uint8_t>& pixels,
+//	std::vector<uint8_t>& rotatedPixels,
+//	int height, int width) {
+//
+//	for (int i = startRow; i < endRow; ++i) {
+//		for (int j = startCol; j < endCol; ++j) {
+//			int srcIndex = i * width + j;
+//			int destCol = i;
+//			int destRow = width - 1 - j;
+//			int destIndex = destRow * height + destCol;
+//
+//			rotatedPixels[destIndex] = pixels[srcIndex];
+//		}
+//	}
+//}
+
+
+//单层循环，一维数组
+//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//	const std::vector<uint8_t>& pixels,
+//	std::vector<uint8_t>& rotatedPixels,
+//	int height, int width) {
+//
+//	int pixelOffset = startRow * width + startCol;
+//	int rotatedOffset = startCol * height + startRow;
+//
+//	int totalPixels = (endRow - startRow) * (endCol - startCol);
+//	for (int idx = 0; idx < totalPixels; ++idx) {
+//		int i = (idx / width) + startRow;
+//		int j = (idx % width) + startCol;
+//
+//		int x = j;
+//		int y = height - 1 - i;
+//
+//		rotatedPixels[x * height + i] = pixels[y * width + x];
+//	}
+//}
+
+//二维数组，嵌套循环
+//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//	const std::vector<std::vector<uint8_t>>& pixels,
+//	std::vector<std::vector<uint8_t>>& rotatedPixels,
+//	int height, int width) {
+//	for (int i = startRow; i < endRow; ++i) {
+//		for (int j = startCol; j < endCol; ++j) {
+//			int x = j;
+//			int y = height - 1 - i;
+//			rotatedPixels[j][i] = pixels[y][x];
+//		}
+//	}
+//}
+
+//一维数组
+//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//	const std::vector<std::vector<uint8_t>>& pixels,
+//	std::vector<std::vector<uint8_t>>& rotatedPixels,
+//	int height, int width) {
+//
+//	int totalPixels = (endRow - startRow) * (endCol - startCol);
+//
+//	for (int index = 0; index < totalPixels; ++index) {
+//		int i = startRow + index / (endCol - startCol);  // 当前行
+//		int j = startCol + index % (endCol - startCol);  // 当前列
+//
+//		int x = j;
+//		int y = height - 1 - i;
+//		rotatedPixels[j][i] = pixels[y][x];
+//	}
+//}
+
 
 void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::ifstream inFile(inputFile, std::ios::binary);
@@ -78,12 +179,22 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::vector<RGBQuad> palette(paletteSize);
 	inFile.read(reinterpret_cast<char*>(palette.data()), paletteSize * sizeof(RGBQuad));
 
-	// Read pixel data
-	std::vector<std::vector<uint8_t>> pixels(height, std::vector<uint8_t>(width));
-	for (int i = 0; i < height; ++i) {
-		inFile.read(reinterpret_cast<char*>(pixels[i].data()), width);
+	//// Read pixel data
+	//std::vector<std::vector<uint8_t>> pixels(height, std::vector<uint8_t>(width));
+	//for (int i = 0; i < height; ++i) {
+	//	inFile.read(reinterpret_cast<char*>(pixels[i].data()), width);
 
-		// Skip padding
+	//	// Skip padding
+	//	inFile.seekg((4 - (width) % 4) % 4, std::ios::cur);
+	//}
+
+	std::vector<uint8_t> pixels(height * width);
+
+	for (int i = 0; i < height; ++i) {
+		int offset = i * width;
+
+		inFile.read(reinterpret_cast<char*>(&pixels[offset]), width);
+
 		inFile.seekg((4 - (width) % 4) % 4, std::ios::cur);
 	}
 
@@ -95,97 +206,24 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::cout << "Read time:" << duration_read.count() << "ms" << std::endl;
 
 	// Rotate the image
+	//std::vector<std::vector<uint8_t>> rotatedPixels(width, std::vector<uint8_t>(height));
+	std::vector<uint8_t> rotatedPixels(height * width);
+
+	// Single-threaded processing of the entire image
 	auto start_rotate = std::chrono::high_resolution_clock::now();
+	processBlock(0, height, 0, width, pixels, rotatedPixels, height, width);
+	//int blockSize = 64;
+	//int numBlocksRow = (height + blockSize - 1) / blockSize;
+	//int numBlocksCol = (width + blockSize - 1) / blockSize;
 
-	std::vector<std::vector<uint8_t>> rotatedPixels(width, std::vector<uint8_t>(height));
-	//for (int i = 0; i < height; ++i) {
-	//	for (int j = 0; j < width; ++j) {
-	//		rotatedPixels[j][height - 1 - i] = pixels[i][j];
-	//	}
+	//for (int blockIndex = 0; blockIndex < numBlocksRow * numBlocksCol; ++blockIndex) {
+	//	int startRow = (blockIndex / numBlocksCol) * blockSize;
+	//	int startCol = (blockIndex % numBlocksCol) * blockSize;
+	//	int endRow = std::min(startRow + blockSize, height);
+	//	int endCol = std::min(startCol + blockSize, width);
+
+	//	processBlock(startRow, endRow, startCol, endCol, pixels, rotatedPixels, height, width);
 	//}
-
-	//Bilinear interpolation
-	//for (int i = 0; i < height; ++i) {
-	//	for (int j = 0; j < width; ++j) {
-	//		float x = j;
-	//		float y = height - 1 - i;
-	//		int x0 = static_cast<int>(floor(x));
-	//		int y0 = static_cast<int>(floor(y));
-	//		int x1 = x0 + 1;
-	//		int y1 = y0 + 1;
-	//		float u = x - x0;
-	//		float v = y - y0;
-
-	//		if (x0 < 0) x0 = 0;
-	//		if (y0 < 0) y0 = 0;
-	//		if (x1 >= width) x1 = width - 1;
-	//		if (y1 >= height) y1 = height - 1;
-
-	//		rotatedPixels[j][i] =
-	//			(1 - u) * (1 - v) * pixels[y0][x0] +
-	//			u * (1 - v) * pixels[y0][x1] +
-	//			(1 - u) * v * pixels[y1][x0] +
-	//			u * v * pixels[y1][x1];
-	//	}
-	//}
-
-	//Nearest neighbor interpolation
-	//for (int i = 0; i < height; ++i) {
-	//	for (int j = 0; j < width; ++j) {
-	//		int x = j;
-	//		int y = height - 1 - i;
-
-	//		if (x < 0 || x >= width || y < 0 || y >= height) {
-	//			rotatedPixels[j][i] = 0; 
-	//		}
-	//		else {
-	//			rotatedPixels[j][i] = pixels[y][x];
-	//		}
-	//	}
-	//}
-
-	//Nearest neighbor interpolation 2
-
-	/*int minX = 0, maxX = width - 1;
-	int minY = 0, maxY = height - 1;
-
-	for (int i = 0; i < height; ++i) {
-		int y = height - 1 - i;
-		if (y < minY) minY = y;
-		if (y > maxY) maxY = y;
-	}
-
-	for (int j = 0; j < width; ++j) {
-		if (j < minX) minX = j;
-		if (j > maxX) maxX = j;
-	}
-
-	for (int i = minY; i <= maxY; ++i) {
-		for (int j = minX; j <= maxX; ++j) {
-			int x = j;
-			int y = height - 1 - i;
-			rotatedPixels[j][i] = pixels[y][x];
-		}
-	}*/
-
-	// Nearest neighbor interpolation multi-threaded block processing
-	int height1 = infoHeader.height;
-	int width1 = infoHeader.width;
-	std::vector<std::vector<uint8_t>> rotatedPixels1(width1, std::vector<uint8_t>(height1));
-
-	int blockRows = height / NUM_THREADS;
-	int blockCols = width;
-
-	std::vector<std::thread> threads;
-	for (int i = 0; i < NUM_THREADS; ++i) {
-		int startRow = i * blockRows;
-		int endRow = (i == NUM_THREADS - 1) ? height : startRow + blockRows;
-		threads.emplace_back(processBlock, startRow, endRow, 0, blockCols, std::ref(pixels), std::ref(rotatedPixels), height, width);
-	}
-
-	for (auto& thread : threads) {
-		thread.join();
-	}
 
 	auto end_rotate = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration_rotate = end_rotate - start_rotate;
@@ -209,11 +247,20 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	// Write the color palette
 	outFile.write(reinterpret_cast<const char*>(palette.data()), paletteSize * sizeof(RGBQuad));
 
+	//// Write pixel data
+	//for (int i = 0; i < infoHeader.height; ++i) {
+	//	outFile.write(reinterpret_cast<const char*>(rotatedPixels[i].data()), infoHeader.width);
+
+	//	// Add padding
+	//	uint8_t padding[3] = { 0, 0, 0 };
+	//	outFile.write(reinterpret_cast<const char*>(padding), (4 - (infoHeader.width) % 4) % 4);
+	//}
 	// Write pixel data
 	for (int i = 0; i < infoHeader.height; ++i) {
-		outFile.write(reinterpret_cast<const char*>(rotatedPixels[i].data()), infoHeader.width);
+		int offset = i * infoHeader.width;
 
-		// Add padding
+		outFile.write(reinterpret_cast<const char*>(&rotatedPixels[offset]), infoHeader.width);
+
 		uint8_t padding[3] = { 0, 0, 0 };
 		outFile.write(reinterpret_cast<const char*>(padding), (4 - (infoHeader.width) % 4) % 4);
 	}
@@ -229,7 +276,7 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	rotateBMP8bit("20.bmp", "output.bmp");
+	rotateBMP8bit("5_06.bmp", "output.bmp");
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration = end - start;

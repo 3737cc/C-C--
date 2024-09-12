@@ -1,16 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="E:\C++_Test\C++\rotate_90\src\main.cpp">
+    <ClCompile Include="E:\C++_Test\C-C--\rotate_90\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\C++_Test\C-C--\rotate_90\src\rotate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="E:\C++_Test\C++\rotate_90\CmakeLists.txt" />
+    <CustomBuild Include="E:\C++_Test\C-C--\rotate_90\CmakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{5FB27959-4422-3994-8A58-58E68CD5F621}</UniqueIdentifier>
+      <UniqueIdentifier>{F55E4F54-41F7-374E-98AB-A3F954084DF2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

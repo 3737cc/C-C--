@@ -1,6 +1,6 @@
-^E:\C++_TEST\C++\ROTATE_90\BUILD\CMAKEFILES\BD31BD8A0F25627E43DF23B3209D73DC\GENERATE.STAMP.RULE
+^E:\C++_TEST\C-C--\ROTATE_90\BUILD\CMAKEFILES\8F16AE22D0C8BF1C31C1EC532B9159DB\GENERATE.STAMP.RULE
 setlocal
-D:\cmake\bin\cmake.exe -SE:/C++_Test/C++/rotate_90 -BE:/C++_Test/C++/rotate_90/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/C++_Test/C++/rotate_90/build/Text-3.sln
+D:\cmake\bin\cmake.exe -SE:/C++_Test/C-C--/rotate_90 -BE:/C++_Test/C-C--/rotate_90/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/C++_Test/C-C--/rotate_90/build/Text-3.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

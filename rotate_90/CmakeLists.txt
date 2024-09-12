@@ -6,10 +6,12 @@ project(Text-3)
 set(CMAKE_CXX_STANDARD 11)
 
 #包含头文件目录
-include_directories(${CMAKE_SOURCE_DIR}/opencv/include)
+include_directories(${CMAKE_SOURCE_DIR}/Hfile)
 
 #设置源文件
-set(SOURCE_FILES src/main.cpp)  # 你的源代码文件
+set(SOURCE_FILES 
+src/main.cpp
+src/rotate.cpp)  # 你的源代码文件
 
 #添加可执行文件
 add_executable(Text ${SOURCE_FILES})
@@ -22,7 +24,7 @@ add_executable(Text ${SOURCE_FILES})
 #target_link_libraries(Text opencv_world4100d.dll)
 
 #链接库
-target_link_directories(Text PUBLIC ${CMAKE_SOURCE_DIR}/opencv/lib)
+#target_link_directories(Text PUBLIC ${CMAKE_SOURCE_DIR}/opencv/lib)
 
 #将所用的dll文件复制到构建目录下以便使用
 #configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_world4100.dll ${CMAKE_BINARY_DIR}/opencv_world4100.dll COPYONLY)
@@ -31,4 +33,7 @@ target_link_directories(Text PUBLIC ${CMAKE_SOURCE_DIR}/opencv/lib)
 #configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_videoio_msmf480_64.dll ${CMAKE_BINARY_DIR}/opencv_videoio_msmf480_64.dll COPYONLY)
 #configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_videoio_msmf480_64d.dll ${CMAKE_BINARY_DIR}/opencv_videoio_msmf480_64d.dll COPYONLY)
 #将指定目录下的fits文件复制到构建目录
-configure_file(${CMAKE_SOURCE_DIR}/debug/1.bmp ${CMAKE_BINARY_DIR}/1.bmp COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/debug/20.bmp ${CMAKE_BINARY_DIR}/20.bmp COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/debug/5_06.bmp ${CMAKE_BINARY_DIR}/5_06.bmp COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/debug/11_7.bmp ${CMAKE_BINARY_DIR}/11_7.bmp COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/debug/2_53.bmp ${CMAKE_BINARY_DIR}/2_53.bmp COPYONLY)
