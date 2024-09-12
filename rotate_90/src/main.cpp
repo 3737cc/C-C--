@@ -38,9 +38,8 @@ struct RGBQuad {
 #pragma pack(pop)
 
 //DDA思想旋转90度
-void rotateBlock90DDA(const std::vector<uint8_t>& pixels,
+void rotateBlock90DDA(int startX, int endX, int startY, int endY, const std::vector<uint8_t>& pixels,
 	std::vector<uint8_t>& rotatedPixels,
-	int startX, int endX, int startY, int endY,
 	int height, int width) {
 	for (int x = startX; x < endX; ++x) {
 		int destY = height - 1 - startY;
@@ -61,7 +60,7 @@ void rotateBlock90DDA(const std::vector<uint8_t>& pixels,
 	}
 }
 
-//旋转90度
+//旋转90度, 双层遍历
 void processBlock(int startRow, int endRow, int startCol, int endCol,
 	const std::vector<uint8_t>& pixels,
 	std::vector<uint8_t>& rotatedPixels,
@@ -97,24 +96,6 @@ void processBlock(int startRow, int endRow, int startCol, int endCol,
 //		}
 //	}
 //}
-
-//异步任务进行处理
-void asyncProcess(int numTasks, const std::vector<uint8_t>& pixels,
-	std::vector<uint8_t>& rotatedPixels, int height, int width) {
-	int blockSize = height / numTasks;
-	std::vector<std::future<void>> futures;
-
-	for (int t = 0; t < numTasks; ++t) {
-		int startRow = t * blockSize;
-		int endRow = (t == numTasks - 1) ? height : startRow + blockSize;
-		futures.push_back(std::async(std::launch::async, processBlock, startRow, endRow, 0, width,
-			std::cref(pixels), std::ref(rotatedPixels), height, width));
-	}
-
-	for (auto& future : futures) {
-		future.get(); // Wait for all tasks to complete
-	}
-}
 
 ////旋转180度并且镜像，但是图像会损失什么原因？？
 //void processBlock(int startRow, int endRow, int startCol, int endCol,
@@ -182,15 +163,15 @@ void asyncProcess(int numTasks, const std::vector<uint8_t>& pixels,
 //}
 
 //二维数组，嵌套循环
-//void processBlock(int startRow, int endRow, int startCol, int endCol,
+//void processblock(int startrow, int endrow, int startcol, int endcol,
 //	const std::vector<std::vector<uint8_t>>& pixels,
-//	std::vector<std::vector<uint8_t>>& rotatedPixels,
+//	std::vector<std::vector<uint8_t>>& rotatedpixels,
 //	int height, int width) {
-//	for (int i = startRow; i < endRow; ++i) {
-//		for (int j = startCol; j < endCol; ++j) {
+//	for (int i = startrow; i < endrow; ++i) {
+//		for (int j = startcol; j < endcol; ++j) {
 //			int x = j;
 //			int y = height - 1 - i;
-//			rotatedPixels[j][i] = pixels[y][x];
+//			rotatedpixels[j][i] = pixels[y][x];
 //		}
 //	}
 //}
@@ -213,6 +194,23 @@ void asyncProcess(int numTasks, const std::vector<uint8_t>& pixels,
 //	}
 //}
 
+//异步任务进行处理
+void asyncProcess(int numTasks, const std::vector<uint8_t>& pixels,
+	std::vector<uint8_t>& rotatedPixels, int height, int width) {
+	int blockSize = height / numTasks;
+	std::vector<std::future<void>> futures;
+
+	for (int t = 0; t < numTasks; ++t) {
+		int startRow = t * blockSize;
+		int endRow = (t == numTasks - 1) ? height : startRow + blockSize;
+		futures.push_back(std::async(std::launch::async, processBlock, startRow, endRow, 0, width,
+			std::cref(pixels), std::ref(rotatedPixels), height, width));
+	}
+
+	for (auto& future : futures) {
+		future.get(); // Wait for all tasks to complete
+	}
+}
 
 void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::ifstream inFile(inputFile, std::ios::binary);
@@ -272,10 +270,11 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	std::vector<uint8_t> rotatedPixels(height * width);
 	auto start_rotate = std::chrono::high_resolution_clock::now();
 
+	//asyncProcess(4, pixels, rotatedPixels, height, width);
 	asyncProcess(4, pixels, rotatedPixels, height, width);
 
 	//processBlock(0, height, 0, width, pixels, rotatedPixels, height, width);
-	//rotateBlock90DDA(pixels, rotatedPixels, 0, width, 0, height, height, width);
+	//rotateBlock90DDA(0, height, 0, width, pixels, rotatedPixels, height, width);
 	//int blockSize = 64;
 	//int numBlocksRow = (height + blockSize - 1) / blockSize;
 	//int numBlocksCol = (width + blockSize - 1) / blockSize;
@@ -332,13 +331,16 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	auto end_write = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration_write = end_write - start_write;
 
-	std::cout << "Write time:" << duration_write.count() << "ms" << std::endl;
+	std::cout << "Write time:" << duration_write.count() << "ms" << std::endl << std::endl;
 }
 
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	rotateBMP8bit("11_7.bmp", "output.bmp");
+	rotateBMP8bit("2_53.bmp", "output_2_53.bmp");
+	rotateBMP8bit("5_06.bmp", "output_5_06.bmp");
+	rotateBMP8bit("11_7.bmp", "output_11_7.bmp");
+	rotateBMP8bit("20.bmp", "output_20.bmp");
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration = end - start;
