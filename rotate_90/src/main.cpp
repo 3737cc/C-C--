@@ -36,6 +36,32 @@ struct RGBQuad {
 	uint8_t reserved;
 };
 #pragma pack(pop)
+
+//DDA思想旋转90度
+void rotateBlock90DDA(const std::vector<uint8_t>& pixels,
+	std::vector<uint8_t>& rotatedPixels,
+	int startX, int endX, int startY, int endY,
+	int height, int width) {
+	for (int x = startX; x < endX; ++x) {
+		int destY = height - 1 - startY;
+		float error = 0.0f;
+
+		for (int y = startY; y < endY; ++y) {
+			int srcIndex = y * width + x;
+			int destIndex = x * height + destY;
+
+			rotatedPixels[destIndex] = pixels[srcIndex];
+
+			error += 1.0f;
+			if (error >= 1.0f) {
+				destY--;
+				error -= 1.0f;
+			}
+		}
+	}
+}
+
+//旋转90度
 void processBlock(int startRow, int endRow, int startCol, int endCol,
 	const std::vector<uint8_t>& pixels,
 	std::vector<uint8_t>& rotatedPixels,
@@ -52,8 +78,45 @@ void processBlock(int startRow, int endRow, int startCol, int endCol,
 	}
 }
 
+////多线程进行处理
+//void parallelProcess(int numThreads, const std::vector<uint8_t>& pixels,
+//	std::vector<uint8_t>& rotatedPixels, int height, int width) {
+//	int blockSize = height / numThreads;
+//	std::vector<std::thread> threads;
+//
+//	for (int t = 0; t < numThreads; ++t) {
+//		int startRow = t * blockSize;
+//		int endRow = (t == numThreads - 1) ? height : startRow + blockSize;
+//		threads.emplace_back(processBlock, startRow, endRow, 0, width,
+//			std::ref(pixels), std::ref(rotatedPixels), height, width);
+//	}
+//
+//	for (auto& thread : threads) {
+//		if (thread.joinable()) {
+//			thread.join();
+//		}
+//	}
+//}
 
+//异步任务进行处理
+void asyncProcess(int numTasks, const std::vector<uint8_t>& pixels,
+	std::vector<uint8_t>& rotatedPixels, int height, int width) {
+	int blockSize = height / numTasks;
+	std::vector<std::future<void>> futures;
 
+	for (int t = 0; t < numTasks; ++t) {
+		int startRow = t * blockSize;
+		int endRow = (t == numTasks - 1) ? height : startRow + blockSize;
+		futures.push_back(std::async(std::launch::async, processBlock, startRow, endRow, 0, width,
+			std::cref(pixels), std::ref(rotatedPixels), height, width));
+	}
+
+	for (auto& future : futures) {
+		future.get(); // Wait for all tasks to complete
+	}
+}
+
+////旋转180度并且镜像，但是图像会损失什么原因？？
 //void processBlock(int startRow, int endRow, int startCol, int endCol,
 //	const std::vector<uint8_t>& pixels,
 //	std::vector<uint8_t>& rotatedPixels,
@@ -141,8 +204,8 @@ void processBlock(int startRow, int endRow, int startCol, int endCol,
 //	int totalPixels = (endRow - startRow) * (endCol - startCol);
 //
 //	for (int index = 0; index < totalPixels; ++index) {
-//		int i = startRow + index / (endCol - startCol);  // 当前行
-//		int j = startCol + index % (endCol - startCol);  // 当前列
+//		int i = startRow + index / (endCol - startCol);
+//		int j = startCol + index % (endCol - startCol);
 //
 //		int x = j;
 //		int y = height - 1 - i;
@@ -175,16 +238,15 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	int height = infoHeader.height;
 	int paletteSize = (header.offsetData - sizeof(header) - sizeof(infoHeader)) / sizeof(RGBQuad);
 
-	// Read the color palette
+	// RGB读取
 	std::vector<RGBQuad> palette(paletteSize);
 	inFile.read(reinterpret_cast<char*>(palette.data()), paletteSize * sizeof(RGBQuad));
 
-	//// Read pixel data
+	//// 读取像素
 	//std::vector<std::vector<uint8_t>> pixels(height, std::vector<uint8_t>(width));
 	//for (int i = 0; i < height; ++i) {
 	//	inFile.read(reinterpret_cast<char*>(pixels[i].data()), width);
 
-	//	// Skip padding
 	//	inFile.seekg((4 - (width) % 4) % 4, std::ios::cur);
 	//}
 
@@ -205,13 +267,15 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 
 	std::cout << "Read time:" << duration_read.count() << "ms" << std::endl;
 
-	// Rotate the image
+	// 旋转图像
 	//std::vector<std::vector<uint8_t>> rotatedPixels(width, std::vector<uint8_t>(height));
 	std::vector<uint8_t> rotatedPixels(height * width);
-
-	// Single-threaded processing of the entire image
 	auto start_rotate = std::chrono::high_resolution_clock::now();
-	processBlock(0, height, 0, width, pixels, rotatedPixels, height, width);
+
+	asyncProcess(4, pixels, rotatedPixels, height, width);
+
+	//processBlock(0, height, 0, width, pixels, rotatedPixels, height, width);
+	//rotateBlock90DDA(pixels, rotatedPixels, 0, width, 0, height, height, width);
 	//int blockSize = 64;
 	//int numBlocksRow = (height + blockSize - 1) / blockSize;
 	//int numBlocksCol = (width + blockSize - 1) / blockSize;
@@ -230,7 +294,7 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 
 	std::cout << "Rotate time:" << duration_rotate.count() << "ms" << std::endl;
 
-	// Update BMP info header for the rotated image
+	// 写入文件头
 	std::swap(infoHeader.width, infoHeader.height);
 
 	std::ofstream outFile(outputFile, std::ios::binary);
@@ -243,8 +307,6 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 
 	outFile.write(reinterpret_cast<const char*>(&header), sizeof(header));
 	outFile.write(reinterpret_cast<const char*>(&infoHeader), sizeof(infoHeader));
-
-	// Write the color palette
 	outFile.write(reinterpret_cast<const char*>(palette.data()), paletteSize * sizeof(RGBQuad));
 
 	//// Write pixel data
@@ -255,7 +317,7 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 	//	uint8_t padding[3] = { 0, 0, 0 };
 	//	outFile.write(reinterpret_cast<const char*>(padding), (4 - (infoHeader.width) % 4) % 4);
 	//}
-	// Write pixel data
+	// 写入数据
 	for (int i = 0; i < infoHeader.height; ++i) {
 		int offset = i * infoHeader.width;
 
@@ -276,7 +338,7 @@ void rotateBMP8bit(const char* inputFile, const char* outputFile) {
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	rotateBMP8bit("5_06.bmp", "output.bmp");
+	rotateBMP8bit("11_7.bmp", "output.bmp");
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration = end - start;

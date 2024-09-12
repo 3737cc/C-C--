@@ -1,2 +1,2 @@
 ﻿  main.cpp
-  Text.vcxproj -> E:\C++_Test\C-C--\rotate_90\build\Debug\Text.exe
+LINK : fatal error LNK1104: 无法打开文件“E:\C++_Test\C-C--\rotate_90\build\Debug\Text.exe”
