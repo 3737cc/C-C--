@@ -1,0 +1,46 @@
+#示例文件:
+cmake_minimum_required(VERSION 3.30.3)
+project(freeglutRotate)
+
+#使用c++11来编译代码
+set(CMAKE_CXX_STANDARD 11)
+
+#包含头文件目录
+include_directories(${CMAKE_SOURCE_DIR}/Hfile)
+include_directories(${CMAKE_SOURCE_DIR}/freeglut/include)
+include_directories(${CMAKE_SOURCE_DIR}/glew/include)
+#设置源文件
+set(SOURCE_FILES 
+src/main.cpp)  
+
+#添加可执行文件
+add_executable(rotate ${SOURCE_FILES})
+
+#链接动态库
+#target_link_libraries(Text opencv_videoio_ffmpeg480_64.dll)
+#target_link_libraries(Text opencv_videoio_msmf480_64.dll)
+#target_link_libraries(Text opencv_videoio_msmf480_64d.dll)
+#target_link_libraries(Text opencv_world4100.dll)
+#target_link_libraries(Text opencv_world4100d.dll)
+target_link_libraries(rotate freeglut.lib)
+target_link_libraries(rotate glew32.lib)
+target_link_libraries(rotate glew32s.lib)
+
+#链接库
+target_link_directories(rotate PUBLIC ${CMAKE_SOURCE_DIR}/freeglut/lib)
+target_link_directories(rotate PUBLIC ${CMAKE_SOURCE_DIR}/glew/lib)
+
+#将所用的dll文件复制到构建目录下以便使用
+#configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_world4100.dll ${CMAKE_BINARY_DIR}/opencv_world4100.dll COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_world4100d.dll ${CMAKE_BINARY_DIR}/opencv_world4100d.dll COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_videoio_ffmpeg480_64.dll ${CMAKE_BINARY_DIR}/opencv_videoio_ffmpeg480_64.dll COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_videoio_msmf480_64.dll ${CMAKE_BINARY_DIR}/opencv_videoio_msmf480_64.dll COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/opencv/bin/opencv_videoio_msmf480_64d.dll ${CMAKE_BINARY_DIR}/opencv_videoio_msmf480_64d.dll COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/freeglut/bin/freeglut.dll ${CMAKE_BINARY_DIR}/freeglut.dll COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/glew/bin/glew32.dll ${CMAKE_BINARY_DIR}/glew32.dll COPYONLY)
+
+#将指定目录下的fits文件复制到构建目录
+#configure_file(${CMAKE_SOURCE_DIR}/debug/20.bmp ${CMAKE_BINARY_DIR}/20.bmp COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/debug/5_06.bmp ${CMAKE_BINARY_DIR}/5_06.bmp COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/debug/11_7.bmp ${CMAKE_BINARY_DIR}/11_7.bmp COPYONLY)
+#configure_file(${CMAKE_SOURCE_DIR}/debug/2_53.bmp ${CMAKE_BINARY_DIR}/2_53.bmp COPYONLY)
