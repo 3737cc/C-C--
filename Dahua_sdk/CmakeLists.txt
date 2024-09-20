@@ -1,0 +1,64 @@
+cmake_minimum_required(VERSION 3.21.1)
+project(Dahua_Sdk VERSION 0.1 LANGUAGES CXX)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 包含头文件目录
+include_directories(
+    ${CMAKE_SOURCE_DIR}/Dahua/Include
+    ${CMAKE_SOURCE_DIR}/Include
+)
+
+# 查找 Qt5 包
+find_package(Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
+
+# 设置源文件
+set(SOURCE_FILES 
+    src/main.cpp
+    src/mainwindow.cpp
+    src/mainwindow.ui
+    src/mainwindow.h
+    src/CameraControl.cpp
+    src/ImageAcquisition.cpp
+)
+
+# 添加可执行文件
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+# 设置链接目录
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/Dahua/Lib/x64)
+
+# 链接库
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    Qt5::Widgets
+    ${CMAKE_SOURCE_DIR}/Dahua/Lib/x64/MVSDKmd.lib
+)
+
+# 复制 DLL 文件
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/Dahua/Bin/CLIDelegate.dll"
+        "${CMAKE_SOURCE_DIR}/Dahua/Bin/ThridLibray.dll"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+)
+
+# 设置目标属性
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.GUI
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME}
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

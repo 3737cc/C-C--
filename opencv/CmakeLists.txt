@@ -20,8 +20,8 @@ add_executable(Text ${SOURCE_FILES})
 #target_link_libraries(Text opencv_videoio_ffmpeg480_64.dll)
 #target_link_libraries(Text opencv_videoio_msmf480_64.dll)
 #target_link_libraries(Text opencv_videoio_msmf480_64d.dll)
-target_link_libraries(Text opencv_world4100.dll)
-target_link_libraries(Text opencv_world4100d.dll)
+target_link_libraries(Text opencv_world4100.lib)
+target_link_libraries(Text opencv_world4100d.lib)
 
 #链接库
 target_link_directories(Text PUBLIC ${CMAKE_SOURCE_DIR}/opencv/lib)
