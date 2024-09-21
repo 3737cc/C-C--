@@ -12,6 +12,7 @@
 
 int showRate = 30;
 int qwidth = 1920, qheight = 1024;
+int acquisition = 30;
 
 using namespace Dahua::GenICam;
 using namespace Dahua::Infra;
@@ -24,17 +25,15 @@ CammerWidget::CammerWidget(QWidget* parent) :
 	, m_nFirstFrameTime(0)
 	, m_nLastFrameTime(0)
 	, m_bNeedUpdate(true)
-	, m_nTotalFrameCount(0)
+	, m_nTotalFrameCount(0),
+	m_zoomFactor(1.0f)
 {
 	ui->setupUi(this);
 
 	qRegisterMetaType<uint64_t>("uint64_t");
 	connect(this, SIGNAL(signalShowImage(uint8_t*, int, int, uint64_t)), this, SLOT(ShowImage(uint8_t*, int, int, uint64_t)));
 
-	// 默认显示30帧
-	// defult display 30 frames 
 	setDisplayFPS(showRate);
-
 	m_elapsedTimer.start();
 
 	// 启动显示线程
@@ -86,6 +85,44 @@ void CammerWidget::FrameCallback(const CFrame& frame)
 		}
 
 		m_qDisplayFrameQueue.push_back(frameInfo);
+	}
+
+	recvNewFrame(frame);
+}
+
+//单帧处理
+void CammerWidget::FrameSingle(const CFrame& frame)
+{
+	CFrameInfo frameInfo;
+	frameInfo.m_nWidth = frame.getImageWidth();
+	frameInfo.m_nHeight = frame.getImageHeight();
+	frameInfo.m_nBufferSize = frame.getImageSize();
+	frameInfo.m_nPaddingX = frame.getImagePadddingX();
+	frameInfo.m_nPaddingY = frame.getImagePadddingY();
+	frameInfo.m_ePixelType = frame.getImagePixelFormat();
+	frameInfo.m_pImageBuf = (BYTE*)malloc(sizeof(BYTE) * frameInfo.m_nBufferSize);
+	frameInfo.m_nTimeStamp = frame.getImageTimeStamp();
+
+	// 内存申请失败，直接返回
+	// memory application failed, return directly
+	if (frameInfo.m_pImageBuf != NULL)
+	{
+		memcpy(frameInfo.m_pImageBuf, frame.getImage(), frame.getImageSize());
+
+		// 只处理第一帧
+		if (m_qDisplayFrameQueue.size() == 0)  // 使用 size() 检查是否为空
+		{
+			m_qDisplayFrameQueue.push_back(frameInfo);
+			// 停止抓取
+			if (m_pStreamSource)
+			{
+				m_pStreamSource->stopGrabbing();
+			}
+		}
+		else
+		{
+			free(frameInfo.m_pImageBuf); // 如果有多余的帧数据，释放内存
+		}
 	}
 
 	recvNewFrame(frame);
@@ -239,6 +276,39 @@ bool CammerWidget::CameraStart()
 
 	return true;
 }
+
+//单张采集
+bool CammerWidget::CaptureSingleImage()
+{
+	if (NULL == m_pStreamSource)
+	{
+		m_pStreamSource = CSystem::getInstance().createStreamSource(m_pCamera);
+	}
+
+	if (NULL == m_pStreamSource)
+	{
+		return false;
+	}
+
+	if (m_pStreamSource->isGrabbing())
+	{
+		return true;
+	}
+
+	bool bRet = m_pStreamSource->attachGrabbing(IStreamSource::Proc(&CammerWidget::FrameSingle, this));
+	if (!bRet)
+	{
+		return false;
+	}
+
+	if (!m_pStreamSource->startGrabbing())
+	{
+		return false;
+	}
+
+	return true;
+}
+
 
 // 停止采集
 // stop grabbing
@@ -410,12 +480,16 @@ void CammerWidget::SetCamera(const QString& strKey)
 	CSystem& systemObj = CSystem::getInstance();
 	m_pCamera = systemObj.getCameraPtr(strKey.toStdString().c_str());
 	sptrFormatControl = systemObj.createImageFormatControl(m_pCamera);
+	acquisitionControl = systemObj.createAcquisitionControl(m_pCamera);
 }
 
 // 显示
 // diaplay
 bool CammerWidget::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat)
 {
+
+	// 默认显示30帧
+	// defult display 30 frames 
 	QImage image;
 	if (NULL == pRgbFrameBuf ||
 		nWidth == 0 ||
@@ -432,9 +506,9 @@ bool CammerWidget::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uin
 	{
 		image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_RGB888);
 	}
-	// 将QImage的大小收缩或拉伸，与label的大小保持一致。这样label中能显示完整的图片
-	// Shrink or stretch the size of Qimage to match the size of the label. In this way, the complete image can be displayed in the label
-	QImage imageScale = image.scaled(QSize(ui->label_Pixmap->width(), ui->label_Pixmap->height()));
+	//进行缩放处理
+	QSize scaledSize(nWidth * m_zoomFactor, nHeight * m_zoomFactor);
+	QImage imageScale = image.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	QPixmap pixmap = QPixmap::fromImage(imageScale);
 	ui->label_Pixmap->setPixmap(pixmap);
 	free(pRgbFrameBuf);
@@ -569,11 +643,12 @@ bool CammerWidget::isTimeToDisplay()
 // set display frequency
 void CammerWidget::setDisplayFPS(int nFPS)
 {
-	if (nFPS > 0)
+	showRate = nFPS;
+	if (showRate > 0)
 	{
 		CGuard guard(m_mxTime);
 
-		m_nDisplayInterval = 1000 * 1000 * 1000.0 / nFPS;
+		m_nDisplayInterval = 1000 * 1000 * 1000.0 / showRate;
 	}
 	else
 	{
@@ -683,18 +758,42 @@ void CammerWidget::recvNewFrame(const CFrame& pBuf)
 }
 
 // 更新帧率
-void CammerWidget::updateShowRate(int value)
+void CammerWidget::updateShowRate(double value)
 {
-	showRate = value;
+	double maxFrameRate = 2000.0;
+	acquisition = value;
+	CDoubleNode frameRate = acquisitionControl->acquisitionFrameRate();
+	if (acquisition < maxFrameRate) {
+		//CBoolNode frameRateEnableNode = acquisitionControl->acquisitionFrameRateEnable();
+		frameRate.setValue(acquisition);
+	}
+	else {
+		frameRate.setValue(maxFrameRate);
+	}
+	//frameRateEnableNode.setValue(true);
 }
+
+//缩放
+void CammerWidget::zoomIn() {
+	// 增加缩放因子
+	m_zoomFactor *= 1.1;
+	update();
+}
+
+void CammerWidget::zoomOut() {
+	// 减少缩放因子
+	m_zoomFactor /= 1.1;
+	update();
+}
+
 
 void CammerWidget::resolution(int width, int height)
 {
 	qwidth = width;
 	qheight = height;
 	// 获取宽度和高度节点
-	CIntNode nodeWidth = sptrFormatControl->width(); // 假设getWidthNode()返回CIntNode
-	CIntNode nodeHeight = sptrFormatControl->height(); // 假设getHeightNode()返回CIntNode
+	CIntNode nodeWidth = sptrFormatControl->width();
+	CIntNode nodeHeight = sptrFormatControl->height();
 	nodeWidth.setValue(qwidth);
 	nodeHeight.setValue(qheight);
 }

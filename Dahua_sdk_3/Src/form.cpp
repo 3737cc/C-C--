@@ -4,6 +4,7 @@
 Form::Form(QWidget* parent) :
 	QWidget(parent)
 	, ui(new Ui::Form)
+	, zoomFactor(1.0)
 {
 	ui->setupUi(this);
 
@@ -19,8 +20,9 @@ Form::~Form()
 
 void Form::initUi()
 {
-	ui->horizontalSlider_Rote->setRange(0, 180);
-	ui->horizontalSlider_Gain->setRange(0, 180);
+	ui->horizontalSlider_Rote->setRange(0, 2000);
+	ui->horizontalSlider_Gain->setRange(0, 200);
+	ui->horizontalSlider_Exposure->setRange(0, 2000);
 
 	ui->label_Statistic->setText("");// 连接相机之前不显示状态栏 | Don't show status bar before connecting camera
 
@@ -73,6 +75,7 @@ void Form::on_pushButton_Open_clicked()
 	ui->pushButton_Open->setEnabled(false);
 	ui->pushButton_Close->setEnabled(true);
 	ui->pushButton_Start->setEnabled(true);
+	ui->pushButton_Onestart->setEnabled(true);
 	ui->pushButton_Stop->setEnabled(false);
 	ui->comboBox->setEnabled(false);
 
@@ -111,6 +114,19 @@ void Form::on_pushButton_Start_clicked()
 
 	ui->pushButton_Start->setEnabled(false);
 	ui->pushButton_Stop->setEnabled(true);
+	ui->pushButton_Onestart->setEnabled(false);
+
+	ui->widget->resetStatistic();
+	m_staticTimer.start(100);
+}
+
+void Form::on_pushButton_Onestart_clicked()
+{
+	ui->widget->CaptureSingleImage();
+
+	ui->pushButton_Start->setEnabled(false);
+	ui->pushButton_Stop->setEnabled(true);
+	ui->pushButton_Onestart->setEnabled(false);
 
 	ui->widget->resetStatistic();
 	m_staticTimer.start(100);
@@ -126,6 +142,7 @@ void Form::on_pushButton_Stop_clicked()
 
 	ui->pushButton_Start->setEnabled(true);
 	ui->pushButton_Stop->setEnabled(false);
+	ui->pushButton_Onestart->setEnabled(true);
 }
 
 void Form::onTimerStreamStatistic()
@@ -143,7 +160,7 @@ void Form::closeEvent(QCloseEvent* event)
 //设置帧率
 void Form::on_horizontalSlider_Rote_valueChanged(int value)
 {
-	ui->widget->setDisplayFPS(value);
+	ui->widget->updateShowRate(value);
 	ui->lineEdit_Rote->setText(QString::number(value));
 }
 
@@ -151,12 +168,12 @@ void Form::on_lineEdit_Rote_editingFinished()
 {
 	QString roteText = ui->lineEdit_Rote->text();
 	bool roteOk;
-	int on_Rote = roteText.toInt(&roteOk);
+	int onRote = roteText.toInt(&roteOk);
 
 	if (roteOk)
 	{
-		ui->horizontalSlider_Rote->setValue(on_Rote);
-		ui->widget->updateShowRate(on_Rote);
+		ui->horizontalSlider_Rote->setValue(onRote);
+		ui->widget->updateShowRate(onRote);
 	}
 }
 
@@ -171,12 +188,32 @@ void Form::on_lineEdit_Gain_editingFinished()
 {
 	QString gainText = ui->lineEdit_Gain->text();
 	bool gainOk;
-	int on_Gain = gainText.toInt(&gainOk);
+	int onGain = gainText.toInt(&gainOk);
 
 	if (gainOk)
 	{
-		ui->horizontalSlider_Gain->setValue(on_Gain);
-		ui->widget->SetAdjustPlus(on_Gain);
+		ui->horizontalSlider_Gain->setValue(onGain);
+		ui->widget->SetAdjustPlus(onGain);
+	}
+}
+
+//设置曝光
+void Form::on_horizontalSlider_Exposure_valueChanged(int value)
+{
+	ui->widget->SetExposeTime(value);
+	ui->lineEdit_Exposure->setText(QString::number(value));
+}
+
+void Form::on_lineEdit_Exposure_editingFinished()
+{
+	QString exposureText = ui->lineEdit_Exposure->text();
+	bool exposureOk;
+	int onExposure = exposureText.toInt(&exposureOk);
+
+	if (exposureOk)
+	{
+		ui->horizontalSlider_Exposure->setValue(onExposure);
+		ui->widget->SetExposeTime(onExposure);
 	}
 }
 
@@ -196,9 +233,14 @@ void Form::on_pushButton_Resolution_clicked()
 
 //显示的放大与缩小
 void Form::wheelEvent(QWheelEvent* event) {
-
+	int delta = event->angleDelta().y(); // 获取滚轮的增量
+	if (delta > 0) {
+		zoomFactor *= 1.1;
+		ui->widget->zoomIn(); // 放大
+	}
+	else {
+		zoomFactor /= 1.1;
+		ui->widget->zoomOut(); // 缩小
+	}
+	event->accept();
 }
-
-
-
-

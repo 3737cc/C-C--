@@ -21,7 +21,6 @@ class Form : public QWidget
 public:
 	explicit Form(QWidget* parent = 0);
 	~Form();
-
 private:
 	void initUi();
 
@@ -43,11 +42,18 @@ private slots:
 
 	void wheelEvent(QWheelEvent* event);
 
+	void on_horizontalSlider_Exposure_valueChanged(int value);
+
+	void on_lineEdit_Exposure_editingFinished();
+
+	void on_pushButton_Onestart_clicked();
+
 private:
 	Ui::Form* ui;
 
 	Dahua::Infra::TVector<Dahua::GenICam::ICameraPtr> m_vCameraPtrList;	// 发现的相机列表 | List of cameras found
 	QTimer m_staticTimer;	// 定时器，定时刷新状态栏信息 | Timer, refresh status bar information regularly
+	double zoomFactor;
 };
 
 #endif // FORM_H

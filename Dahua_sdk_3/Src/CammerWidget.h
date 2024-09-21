@@ -8,6 +8,7 @@
 #include <QElapsedTimer>
 #include <QMutex>
 #include "GenICam/ParameterNode.h"
+#include <GenICam/AcquisitionControl.h>
 
 // 状态栏统计信息 
 // Status bar statistics
@@ -72,11 +73,7 @@ public:
 		trigSoftware = 1,	// 软件触发 | software trigger
 		trigLine = 2,		// 外部触发	| external trigger
 	};
-	//更新帧率
-	void updateShowRate(int);
 	void resolution(int width, int height);
-	qreal getZoomFactor() const;
-	void setZoomFactor(qreal zoom);
 	// 打开相机
 	// open cmaera
 	bool CameraOpen(void);
@@ -86,12 +83,15 @@ public:
 	// 开始采集
 	// start grabbing
 	bool CameraStart(void);
+	bool CaptureSingleImage(void);
 	// 停止采集
 	// stop grabbing
 	bool CameraStop(void);
 	// 取流回调函数
 	// get frame callback function
 	void FrameCallback(const Dahua::GenICam::CFrame& frame);
+	//单帧处理
+	void FrameSingle(const CFrame& frame);
 	// 切换采集方式、触发方式 （连续采集、外部触发、软件触发）
 	// Switch acquisition mode and triggering mode (continuous acquisition, external triggering and software triggering)
 	bool CameraChangeTrig(ETrigType trigType = trigContinous);
@@ -107,6 +107,11 @@ public:
 	// 设置增益
 	// set gain
 	bool SetAdjustPlus(double dGainRaw);
+	//更新帧率
+	void updateShowRate(double);
+	//缩放
+	void zoomIn();
+	void zoomOut();
 	// 设置当前相机
 	// set current camera
 	void SetCamera(const QString& strKey);
@@ -135,6 +140,8 @@ private:
 	void recvNewFrame(const CFrame& pBuf);
 	void updateStatistic();
 
+	float m_zoomFactor;
+
 private slots:
 	// 显示一帧图像
 	// display a frame image 
@@ -149,7 +156,8 @@ private:
 
 	Dahua::GenICam::ICameraPtr m_pCamera;							// 当前相机 | current camera 
 	Dahua::GenICam::IStreamSourcePtr m_pStreamSource;				// 流对象   |  stream object
-	Dahua::GenICam::IImageFormatControlPtr sptrFormatControl;       // 图像格式控制指针
+	Dahua::GenICam::IImageFormatControlPtr sptrFormatControl;		// 图像格式控制指针
+	Dahua::GenICam::IAcquisitionControlPtr acquisitionControl;		// 帧控制指针
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue
