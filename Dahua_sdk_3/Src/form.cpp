@@ -53,6 +53,7 @@ void Form::initUi()
 	ui->pushButton_Close->setEnabled(false);
 	ui->pushButton_Start->setEnabled(false);
 	ui->pushButton_Stop->setEnabled(false);
+	ui->pushButton_Onestart->setEnabled(false);
 
 }
 
@@ -98,6 +99,7 @@ void Form::on_pushButton_Close_clicked()
 	ui->pushButton_Open->setEnabled(true);
 	ui->pushButton_Close->setEnabled(false);
 	ui->pushButton_Start->setEnabled(false);
+	ui->pushButton_Onestart->setEnabled(false);
 	ui->pushButton_Stop->setEnabled(false);
 	ui->comboBox->setEnabled(true);
 }

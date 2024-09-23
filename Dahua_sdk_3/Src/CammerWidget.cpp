@@ -763,14 +763,14 @@ void CammerWidget::updateShowRate(double value)
 	double maxFrameRate = 2000.0;
 	acquisition = value;
 	CDoubleNode frameRate = acquisitionControl->acquisitionFrameRate();
+	CBoolNode frameRateEnableNode = acquisitionControl->acquisitionFrameRateEnable();
 	if (acquisition < maxFrameRate) {
-		//CBoolNode frameRateEnableNode = acquisitionControl->acquisitionFrameRateEnable();
 		frameRate.setValue(acquisition);
 	}
 	else {
 		frameRate.setValue(maxFrameRate);
 	}
-	//frameRateEnableNode.setValue(true);
+	frameRateEnableNode.setValue(true);
 }
 
 //缩放
