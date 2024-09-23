@@ -786,7 +786,6 @@ void CammerWidget::zoomOut() {
 	update();
 }
 
-
 void CammerWidget::resolution(int width, int height)
 {
 	qwidth = width;

@@ -32,20 +32,14 @@ private slots:
 	void on_comboBox_currentIndexChanged(int nIndex);
 	void closeEvent(QCloseEvent* event);
 	void onTimerStreamStatistic();// 定时刷新状态栏信息 | Refresh status bar information regularly
-
 	void on_horizontalSliderRote_valueChanged(int value);
 	void on_horizontalSliderGain_valueChanged(int value);
 	void on_pushButtonResolution_clicked();
-
 	void on_lineEditRote_editingFinished();
 	void on_lineEditGain_editingFinished();
-
 	void wheelEvent(QWheelEvent* event);
-
 	void on_horizontalSliderExposure_valueChanged(int value);
-
 	void on_lineEditExposure_editingFinished();
-
 	void on_pushButtonOnestart_clicked();
 
 private:
