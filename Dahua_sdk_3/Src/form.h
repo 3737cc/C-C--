@@ -25,34 +25,34 @@ private:
 	void initUi();
 
 private slots:
-	void on_pushButton_Start_clicked();
-	void on_pushButton_Stop_clicked();
-	void on_pushButton_Open_clicked();
-	void on_pushButton_Close_clicked();
+	void on_pushButtonStart_clicked();
+	void on_pushButtonStop_clicked();
+	void on_pushButtonOpen_clicked();
+	void on_pushButtonClose_clicked();
 	void on_comboBox_currentIndexChanged(int nIndex);
 	void closeEvent(QCloseEvent* event);
 	void onTimerStreamStatistic();// 定时刷新状态栏信息 | Refresh status bar information regularly
 
-	void on_horizontalSlider_Rote_valueChanged(int value);
-	void on_horizontalSlider_Gain_valueChanged(int value);
-	void on_pushButton_Resolution_clicked();
+	void on_horizontalSliderRote_valueChanged(int value);
+	void on_horizontalSliderGain_valueChanged(int value);
+	void on_pushButtonResolution_clicked();
 
-	void on_lineEdit_Rote_editingFinished();
-	void on_lineEdit_Gain_editingFinished();
+	void on_lineEditRote_editingFinished();
+	void on_lineEditGain_editingFinished();
 
 	void wheelEvent(QWheelEvent* event);
 
-	void on_horizontalSlider_Exposure_valueChanged(int value);
+	void on_horizontalSliderExposure_valueChanged(int value);
 
-	void on_lineEdit_Exposure_editingFinished();
+	void on_lineEditExposure_editingFinished();
 
-	void on_pushButton_Onestart_clicked();
+	void on_pushButtonOnestart_clicked();
 
 private:
 	Ui::Form* ui;
 
-	Dahua::Infra::TVector<Dahua::GenICam::ICameraPtr> m_vCameraPtrList;	// 发现的相机列表 | List of cameras found
-	QTimer m_staticTimer;	// 定时器，定时刷新状态栏信息 | Timer, refresh status bar information regularly
+	Dahua::Infra::TVector<Dahua::GenICam::ICameraPtr> mvCameraPtrList;	// 发现的相机列表 | List of cameras found
+	QTimer mstaticTimer;	// 定时器，定时刷新状态栏信息 | Timer, refresh status bar information regularly
 	double zoomFactor;
 };
 

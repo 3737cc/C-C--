@@ -44,7 +44,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Open">
+  <widget class="QPushButton" name="pushButtonOpen">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -69,7 +69,7 @@
     <string>打开相机</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Close">
+  <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
     <rect>
      <x>750</x>
@@ -94,7 +94,7 @@
     <string>关闭相机</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Start">
+  <widget class="QPushButton" name="pushButtonStart">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -119,7 +119,7 @@
     <string>开始抓图</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Stop">
+  <widget class="QPushButton" name="pushButtonStop">
    <property name="geometry">
     <rect>
      <x>750</x>
@@ -166,7 +166,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Statistic">
+  <widget class="QLabel" name="labelStatistic">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -179,7 +179,7 @@
     <string>Statistics</string>
    </property>
   </widget>
-  <widget class="QSlider" name="horizontalSlider_Rote">
+  <widget class="QSlider" name="horizontalSliderRote">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -192,7 +192,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QSlider" name="horizontalSlider_Gain">
+  <widget class="QSlider" name="horizontalSliderGain">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -205,7 +205,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_Width">
+  <widget class="QLineEdit" name="lineEditWidth">
    <property name="geometry">
     <rect>
      <x>660</x>
@@ -215,7 +215,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_Height">
+  <widget class="QLineEdit" name="lineEditHeight">
    <property name="geometry">
     <rect>
      <x>820</x>
@@ -225,7 +225,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Resolution">
+  <widget class="QPushButton" name="pushButtonResolution">
    <property name="geometry">
     <rect>
      <x>760</x>
@@ -250,7 +250,7 @@
     <string>设置分辨率</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_Rote">
+  <widget class="QLineEdit" name="lineEditRote">
    <property name="geometry">
     <rect>
      <x>820</x>
@@ -260,7 +260,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_Gain">
+  <widget class="QLineEdit" name="lineEditGain">
    <property name="geometry">
     <rect>
      <x>820</x>
@@ -270,7 +270,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Rote">
+  <widget class="QLabel" name="labelRote">
    <property name="geometry">
     <rect>
      <x>650</x>
@@ -283,7 +283,7 @@
     <string>设置帧率</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Gain">
+  <widget class="QLabel" name="labelGain">
    <property name="geometry">
     <rect>
      <x>650</x>
@@ -296,7 +296,7 @@
     <string>设置增益</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_Exposure">
+  <widget class="QLineEdit" name="lineEditExposure">
    <property name="geometry">
     <rect>
      <x>820</x>
@@ -309,7 +309,7 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="label_Exposure">
+  <widget class="QLabel" name="labelExposure">
    <property name="geometry">
     <rect>
      <x>650</x>
@@ -322,7 +322,7 @@
     <string>设置曝光</string>
    </property>
   </widget>
-  <widget class="QSlider" name="horizontalSlider_Exposure">
+  <widget class="QSlider" name="horizontalSliderExposure">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -335,7 +335,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_Onestart">
+  <widget class="QPushButton" name="pushButtonOnestart">
    <property name="geometry">
     <rect>
      <x>850</x>

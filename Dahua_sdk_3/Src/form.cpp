@@ -8,7 +8,7 @@ Form::Form(QWidget* parent) :
 {
 	ui->setupUi(this);
 
-	connect(&m_staticTimer, &QTimer::timeout, this, &Form::onTimerStreamStatistic);
+	connect(&mstaticTimer, &QTimer::timeout, this, &Form::onTimerStreamStatistic);
 
 	initUi();
 }
@@ -20,40 +20,40 @@ Form::~Form()
 
 void Form::initUi()
 {
-	ui->horizontalSlider_Rote->setRange(0, 2000);
-	ui->horizontalSlider_Gain->setRange(0, 200);
-	ui->horizontalSlider_Exposure->setRange(0, 2000);
+	ui->horizontalSliderRote->setRange(0, 2000);
+	ui->horizontalSliderGain->setRange(0, 200);
+	ui->horizontalSliderExposure->setRange(0, 2000);
 
-	ui->label_Statistic->setText("");// 连接相机之前不显示状态栏 | Don't show status bar before connecting camera
+	ui->labelStatistic->setText("");// 连接相机之前不显示状态栏 | Don't show status bar before connecting camera
 
 	CSystem& systemObj = CSystem::getInstance();
-	if (false == systemObj.discovery(m_vCameraPtrList))
+	if (false == systemObj.discovery(mvCameraPtrList))
 	{
 		printf("discovery fail.\n");
 		return;
 	}
-	if (m_vCameraPtrList.size() < 1)
+	if (mvCameraPtrList.size() < 1)
 	{
 		ui->comboBox->setEnabled(false);
-		ui->pushButton_Open->setEnabled(false);
+		ui->pushButtonOpen->setEnabled(false);
 	}
 	else
 	{
 		ui->comboBox->setEnabled(true);
-		ui->pushButton_Open->setEnabled(true);
+		ui->pushButtonOpen->setEnabled(true);
 
-		for (int i = 0; i < m_vCameraPtrList.size(); i++)
+		for (int i = 0; i < mvCameraPtrList.size(); i++)
 		{
-			ui->comboBox->addItem(m_vCameraPtrList[i]->getKey());
+			ui->comboBox->addItem(mvCameraPtrList[i]->getKey());
 		}
 
-		ui->widget->SetCamera(m_vCameraPtrList[0]->getKey());
+		ui->widget->SetCamera(mvCameraPtrList[0]->getKey());
 	}
 
-	ui->pushButton_Close->setEnabled(false);
-	ui->pushButton_Start->setEnabled(false);
-	ui->pushButton_Stop->setEnabled(false);
-	ui->pushButton_Onestart->setEnabled(false);
+	ui->pushButtonClose->setEnabled(false);
+	ui->pushButtonStart->setEnabled(false);
+	ui->pushButtonStop->setEnabled(false);
+	ui->pushButtonOnestart->setEnabled(false);
 
 }
 
@@ -61,52 +61,52 @@ void Form::initUi()
 // set camera which need to connect
 void Form::on_comboBox_currentIndexChanged(int nIndex)
 {
-	ui->widget->SetCamera(m_vCameraPtrList[nIndex]->getKey());
+	ui->widget->SetCamera(mvCameraPtrList[nIndex]->getKey());
 }
 
 // 连接
 // connect
-void Form::on_pushButton_Open_clicked()
+void Form::on_pushButtonOpen_clicked()
 {
 	if (!ui->widget->CameraOpen())
 	{
 		return;
 	}
 
-	ui->pushButton_Open->setEnabled(false);
-	ui->pushButton_Close->setEnabled(true);
-	ui->pushButton_Start->setEnabled(true);
-	ui->pushButton_Onestart->setEnabled(true);
-	ui->pushButton_Stop->setEnabled(false);
+	ui->pushButtonOpen->setEnabled(false);
+	ui->pushButtonClose->setEnabled(true);
+	ui->pushButtonStart->setEnabled(true);
+	ui->pushButtonOnestart->setEnabled(true);
+	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(false);
 
 	// 连接相机之后显示统计信息，所有值为0
 	// Show statistics after connecting camera, all values are 0
 	ui->widget->resetStatistic();
 	QString strStatic = ui->widget->getStatistic();
-	ui->label_Statistic->setText(strStatic);
+	ui->labelStatistic->setText(strStatic);
 }
 
 // 断开
 // disconnect
-void Form::on_pushButton_Close_clicked()
+void Form::on_pushButtonClose_clicked()
 {
-	on_pushButton_Stop_clicked();
+	on_pushButtonStop_clicked();
 	ui->widget->CameraClose();
 
-	ui->label_Statistic->setText("");// 断开相机以后不显示状态栏 | Do not display the status bar after disconnecting the camera
+	ui->labelStatistic->setText("");// 断开相机以后不显示状态栏 | Do not display the status bar after disconnecting the camera
 
-	ui->pushButton_Open->setEnabled(true);
-	ui->pushButton_Close->setEnabled(false);
-	ui->pushButton_Start->setEnabled(false);
-	ui->pushButton_Onestart->setEnabled(false);
-	ui->pushButton_Stop->setEnabled(false);
+	ui->pushButtonOpen->setEnabled(true);
+	ui->pushButtonClose->setEnabled(false);
+	ui->pushButtonStart->setEnabled(false);
+	ui->pushButtonOnestart->setEnabled(false);
+	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(true);
 }
 
 // 开始
 // start 
-void Form::on_pushButton_Start_clicked()
+void Form::on_pushButtonStart_clicked()
 {
 	// 设置连续拉流
 	// set continue grabbing
@@ -114,116 +114,116 @@ void Form::on_pushButton_Start_clicked()
 
 	ui->widget->CameraStart();
 
-	ui->pushButton_Start->setEnabled(false);
-	ui->pushButton_Stop->setEnabled(true);
-	ui->pushButton_Onestart->setEnabled(false);
+	ui->pushButtonStart->setEnabled(false);
+	ui->pushButtonStop->setEnabled(true);
+	ui->pushButtonOnestart->setEnabled(false);
 
 	ui->widget->resetStatistic();
-	m_staticTimer.start(100);
+	mstaticTimer.start(100);
 }
 
-void Form::on_pushButton_Onestart_clicked()
+void Form::on_pushButtonOnestart_clicked()
 {
 	ui->widget->CaptureSingleImage();
 
-	ui->pushButton_Start->setEnabled(false);
-	ui->pushButton_Stop->setEnabled(true);
-	ui->pushButton_Onestart->setEnabled(false);
+	ui->pushButtonStart->setEnabled(false);
+	ui->pushButtonStop->setEnabled(true);
+	ui->pushButtonOnestart->setEnabled(false);
 
 	ui->widget->resetStatistic();
-	m_staticTimer.start(100);
+	mstaticTimer.start(100);
 }
 
 // 停止
 // stop
-void Form::on_pushButton_Stop_clicked()
+void Form::on_pushButtonStop_clicked()
 {
-	m_staticTimer.stop();
+	mstaticTimer.stop();
 
 	ui->widget->CameraStop();
 
-	ui->pushButton_Start->setEnabled(true);
-	ui->pushButton_Stop->setEnabled(false);
-	ui->pushButton_Onestart->setEnabled(true);
+	ui->pushButtonStart->setEnabled(true);
+	ui->pushButtonStop->setEnabled(false);
+	ui->pushButtonOnestart->setEnabled(true);
 }
 
 void Form::onTimerStreamStatistic()
 {
 	QString strStatic = ui->widget->getStatistic();
-	ui->label_Statistic->setText(strStatic);
+	ui->labelStatistic->setText(strStatic);
 }
 
 void Form::closeEvent(QCloseEvent* event)
 {
-	on_pushButton_Stop_clicked();
+	on_pushButtonStop_clicked();
 	ui->widget->CameraClose();
 }
 
 //设置帧率
-void Form::on_horizontalSlider_Rote_valueChanged(int value)
+void Form::on_horizontalSliderRote_valueChanged(int value)
 {
 	ui->widget->updateShowRate(value);
-	ui->lineEdit_Rote->setText(QString::number(value));
+	ui->lineEditRote->setText(QString::number(value));
 }
 
-void Form::on_lineEdit_Rote_editingFinished()
+void Form::on_lineEditRote_editingFinished()
 {
-	QString roteText = ui->lineEdit_Rote->text();
+	QString roteText = ui->lineEditRote->text();
 	bool roteOk;
 	int onRote = roteText.toInt(&roteOk);
 
 	if (roteOk)
 	{
-		ui->horizontalSlider_Rote->setValue(onRote);
+		ui->horizontalSliderRote->setValue(onRote);
 		ui->widget->updateShowRate(onRote);
 	}
 }
 
 //设置增益
-void Form::on_horizontalSlider_Gain_valueChanged(int value)
+void Form::on_horizontalSliderGain_valueChanged(int value)
 {
 	ui->widget->SetAdjustPlus(value);
-	ui->lineEdit_Gain->setText(QString::number(value));
+	ui->lineEditGain->setText(QString::number(value));
 }
 
-void Form::on_lineEdit_Gain_editingFinished()
+void Form::on_lineEditGain_editingFinished()
 {
-	QString gainText = ui->lineEdit_Gain->text();
+	QString gainText = ui->lineEditGain->text();
 	bool gainOk;
 	int onGain = gainText.toInt(&gainOk);
 
 	if (gainOk)
 	{
-		ui->horizontalSlider_Gain->setValue(onGain);
+		ui->horizontalSliderGain->setValue(onGain);
 		ui->widget->SetAdjustPlus(onGain);
 	}
 }
 
 //设置曝光
-void Form::on_horizontalSlider_Exposure_valueChanged(int value)
+void Form::on_horizontalSliderExposure_valueChanged(int value)
 {
 	ui->widget->SetExposeTime(value);
-	ui->lineEdit_Exposure->setText(QString::number(value));
+	ui->lineEditExposure->setText(QString::number(value));
 }
 
-void Form::on_lineEdit_Exposure_editingFinished()
+void Form::on_lineEditExposure_editingFinished()
 {
-	QString exposureText = ui->lineEdit_Exposure->text();
+	QString exposureText = ui->lineEditExposure->text();
 	bool exposureOk;
 	int onExposure = exposureText.toInt(&exposureOk);
 
 	if (exposureOk)
 	{
-		ui->horizontalSlider_Exposure->setValue(onExposure);
+		ui->horizontalSliderExposure->setValue(onExposure);
 		ui->widget->SetExposeTime(onExposure);
 	}
 }
 
 //设置分辨率
-void Form::on_pushButton_Resolution_clicked()
+void Form::on_pushButtonResolution_clicked()
 {
-	QString widthText = ui->lineEdit_Width->text();
-	QString heightText = ui->lineEdit_Height->text();
+	QString widthText = ui->lineEditWidth->text();
+	QString heightText = ui->lineEditHeight->text();
 
 	// 将文本转换为整数（如果你有宽度和高度的输入框）
 	bool widthOk, heightOk;
@@ -246,3 +246,4 @@ void Form::wheelEvent(QWheelEvent* event) {
 	}
 	event->accept();
 }
+
