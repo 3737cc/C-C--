@@ -4,11 +4,10 @@
 Form::Form(QWidget* parent) :
 	QWidget(parent)
 	, ui(new Ui::Form)
-	, zoomFactor(1.0)
 {
 	ui->setupUi(this);
 
-	connect(&mstaticTimer, &QTimer::timeout, this, &Form::onTimerStreamStatistic);
+	connect(&m_mstaticTimer, &QTimer::timeout, this, &Form::onTimerStreamStatistic);
 
 	initUi();
 }
@@ -27,12 +26,12 @@ void Form::initUi()
 	ui->labelStatistic->setText("");// 连接相机之前不显示状态栏 | Don't show status bar before connecting camera
 
 	CSystem& systemObj = CSystem::getInstance();
-	if (false == systemObj.discovery(mvCameraPtrList))
+	if (false == systemObj.discovery(m_vCameraPtrList))
 	{
 		printf("discovery fail.\n");
 		return;
 	}
-	if (mvCameraPtrList.size() < 1)
+	if (m_vCameraPtrList.size() < 1)
 	{
 		ui->comboBox->setEnabled(false);
 		ui->pushButtonOpen->setEnabled(false);
@@ -42,26 +41,26 @@ void Form::initUi()
 		ui->comboBox->setEnabled(true);
 		ui->pushButtonOpen->setEnabled(true);
 
-		for (int i = 0; i < mvCameraPtrList.size(); i++)
+		for (int i = 0; i < m_vCameraPtrList.size(); i++)
 		{
-			ui->comboBox->addItem(mvCameraPtrList[i]->getKey());
+			ui->comboBox->addItem(m_vCameraPtrList[i]->getKey());
 		}
 
-		ui->widget->SetCamera(mvCameraPtrList[0]->getKey());
+		ui->widget->SetCamera(m_vCameraPtrList[0]->getKey());
 	}
 
 	ui->pushButtonClose->setEnabled(false);
 	ui->pushButtonStart->setEnabled(false);
 	ui->pushButtonStop->setEnabled(false);
 	ui->pushButtonOnestart->setEnabled(false);
-
+	ui->pushButtonReset->setEnabled(false);
 }
 
 // 设置要连接的相机
 // set camera which need to connect
 void Form::on_comboBox_currentIndexChanged(int nIndex)
 {
-	ui->widget->SetCamera(mvCameraPtrList[nIndex]->getKey());
+	ui->widget->SetCamera(m_vCameraPtrList[nIndex]->getKey());
 }
 
 // 连接
@@ -79,6 +78,7 @@ void Form::on_pushButtonOpen_clicked()
 	ui->pushButtonOnestart->setEnabled(true);
 	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(false);
+	ui->pushButtonReset->setEnabled(false);
 
 	// 连接相机之后显示统计信息，所有值为0
 	// Show statistics after connecting camera, all values are 0
@@ -102,6 +102,7 @@ void Form::on_pushButtonClose_clicked()
 	ui->pushButtonOnestart->setEnabled(false);
 	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(true);
+	ui->pushButtonReset->setEnabled(false);
 }
 
 // 开始
@@ -117,9 +118,10 @@ void Form::on_pushButtonStart_clicked()
 	ui->pushButtonStart->setEnabled(false);
 	ui->pushButtonStop->setEnabled(true);
 	ui->pushButtonOnestart->setEnabled(false);
+	ui->pushButtonReset->setEnabled(true);
 
 	ui->widget->resetStatistic();
-	mstaticTimer.start(100);
+	m_mstaticTimer.start(100);
 }
 
 void Form::on_pushButtonOnestart_clicked()
@@ -129,22 +131,24 @@ void Form::on_pushButtonOnestart_clicked()
 	ui->pushButtonStart->setEnabled(false);
 	ui->pushButtonStop->setEnabled(true);
 	ui->pushButtonOnestart->setEnabled(false);
+	ui->pushButtonReset->setEnabled(true);
 
 	ui->widget->resetStatistic();
-	mstaticTimer.start(100);
+	m_mstaticTimer.start(100);
 }
 
 // 停止
 // stop
 void Form::on_pushButtonStop_clicked()
 {
-	mstaticTimer.stop();
+	m_mstaticTimer.stop();
 
 	ui->widget->CameraStop();
 
 	ui->pushButtonStart->setEnabled(true);
 	ui->pushButtonStop->setEnabled(false);
 	ui->pushButtonOnestart->setEnabled(true);
+	ui->pushButtonReset->setEnabled(false);
 }
 
 void Form::onTimerStreamStatistic()
@@ -232,3 +236,13 @@ void Form::on_pushButtonResolution_clicked()
 
 	ui->widget->resolution(on_Width, on_Height);
 }
+
+//复位图像
+void Form::on_pushButtonReset_clicked()
+{
+	ui->widget->resetImage();
+	ui->pushButtonStart->setEnabled(false);
+	ui->pushButtonStop->setEnabled(true);
+	ui->pushButtonOnestart->setEnabled(false);
+}
+

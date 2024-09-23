@@ -40,13 +40,13 @@ private slots:
 	void on_horizontalSliderExposure_valueChanged(int value);
 	void on_lineEditExposure_editingFinished();
 	void on_pushButtonOnestart_clicked();
+	void on_pushButtonReset_clicked();
 
 private:
 	Ui::Form* ui;
 
-	Dahua::Infra::TVector<Dahua::GenICam::ICameraPtr> mvCameraPtrList;	// 发现的相机列表 | List of cameras found
-	QTimer mstaticTimer;	// 定时器，定时刷新状态栏信息 | Timer, refresh status bar information regularly
-	double zoomFactor;
+	Dahua::Infra::TVector<Dahua::GenICam::ICameraPtr> m_vCameraPtrList;	// 发现的相机列表 | List of cameras found
+	QTimer m_mstaticTimer;	// 定时器，定时刷新状态栏信息 | Timer, refresh status bar information regularly
 };
 
 #endif // FORM_H

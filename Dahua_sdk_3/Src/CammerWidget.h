@@ -28,14 +28,14 @@ class CFrameInfo : public Dahua::Memory::CBlock
 public:
 	CFrameInfo()
 	{
-		pImageBuf = NULL;
-		nBufferSize = 0;
-		nWidth = 0;
-		nHeight = 0;
-		ePixelType = Dahua::GenICam::gvspPixelMono8;
-		nPaddingX = 0;
-		nPaddingY = 0;
-		nTimeStamp = 0;
+		m_pImageBuf = NULL;
+		m_nBufferSize = 0;
+		m_nWidth = 0;
+		m_nHeight = 0;
+		m_ePixelType = Dahua::GenICam::gvspPixelMono8;
+		m_nPaddingX = 0;
+		m_nPaddingY = 0;
+		m_nTimeStamp = 0;
 	}
 
 	~CFrameInfo()
@@ -43,14 +43,14 @@ public:
 	}
 
 public:
-	BYTE* pImageBuf;
-	int			nBufferSize;
-	int			nWidth;
-	int			nHeight;
-	Dahua::GenICam::EPixelType	ePixelType;
-	int			nPaddingX;
-	int			nPaddingY;
-	uint64_t	nTimeStamp;
+	BYTE* m_pImageBuf;
+	int			m_nBufferSize;
+	int			m_nWidth;
+	int			m_nHeight;
+	Dahua::GenICam::EPixelType	m_ePixelType;
+	int			m_nPaddingX;
+	int			m_nPaddingY;
+	uint64_t	m_nTimeStamp;
 };
 
 namespace Ui {
@@ -108,9 +108,6 @@ public:
 	bool SetAdjustPlus(double dGainRaw);
 	//更新帧率
 	void updateShowRate(double);
-	//缩放
-	void zoomIn();
-	void zoomOut();
 	// 设置当前相机
 	// set current camera
 	void SetCamera(const QString& strKey);
@@ -122,6 +119,8 @@ public:
 	//捕获鼠标事件
 	void mousePressEvent(QMouseEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
+	//重置图像
+	void resetImage();
 	// 状态栏统计信息
 	// Status bar statistics
 	void resetStatistic();
@@ -146,8 +145,6 @@ private:
 	void recvNewFrame(const CFrame& pBuf);
 	void updateStatistic();
 
-	float zoomFactor;
-
 private slots:
 	// 显示一帧图像
 	// display a frame image 
@@ -160,35 +157,36 @@ signals:
 private:
 	Ui::CammerWidget* ui;
 
-	Dahua::GenICam::ICameraPtr pCamera;							// 当前相机 | current camera 
-	Dahua::GenICam::IStreamSourcePtr pStreamSource;				// 流对象   |  stream object
-	Dahua::GenICam::IImageFormatControlPtr sptrFormatControl;		// 图像格式控制指针
-	Dahua::GenICam::IAcquisitionControlPtr acquisitionControl;		// 帧控制指针
-	QImage image; // 成员变量存储图像
-	QRectF targetRect; // 目标矩形
-	QRectF sourceRect; // 源矩形
-	float scaleFactor = 1.0f; // 当前缩放因子
-	QPointF imageOffset; //偏移量
-	bool imageSet;
+	Dahua::GenICam::ICameraPtr m_pCamera;							// 当前相机 | current camera 
+	Dahua::GenICam::IStreamSourcePtr m_pStreamSource;				// 流对象   |  stream object
+	Dahua::GenICam::IImageFormatControlPtr m_pSptrFormatControl;	// 图像格式控制指针
+	Dahua::GenICam::IAcquisitionControlPtr m_pAcquisitionControl;	// 帧控制指针
+	QImage m_aImage;												// 成员变量存储图像
+	QRectF m_aTargetRect;											// 目标矩形
+	QRectF m_aSourceRect;											// 源矩形
+	float m_fScaleFactor = 1.0f;									// 当前缩放因子
+	QPointF m_pImageOffset;											//偏移量
+	bool m_bImageSet;												//重置
+	float m_fZoomFactor;											//缩放因子
 
-	Dahua::Infra::CThreadLite           thdDisplayThread;			// 显示线程      | diaplay thread 
-	TMessageQue<CFrameInfo>				qDisplayFrameQueue;		// 显示队列      | diaplay queue
+	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
+	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue
 
 	// 控制显示帧率   | Control display frame rate
-	Dahua::Infra::CMutex				mxTime;
-	int									nDisplayInterval;         // 显示间隔 | diaplay time internal
-	uintmax_t							nFirstFrameTime;          // 第一帧的时间戳 | Time stamp of the first frame
-	uintmax_t							nLastFrameTime;           // 上一帧的时间戳 | Timestamp of previous frame
-	QElapsedTimer						elapsedTimer;				// 用来计时，控制显示帧率 | Used to time and control the display frame rate
+	Dahua::Infra::CMutex				m_mxTime;
+	int									m_nDisplayInterval;         // 显示间隔 | diaplay time internal
+	uintmax_t							m_nFirstFrameTime;          // 第一帧的时间戳 | Time stamp of the first frame
+	uintmax_t							m_nLastFrameTime;           // 上一帧的时间戳 | Timestamp of previous frame
+	QElapsedTimer						m_elapsedTimer;				// 用来计时，控制显示帧率 | Used to time and control the display frame rate
 
 	// 状态栏统计信息 
 	// Status bar statistics	
 	typedef std::list<FrameStatInfo> FrameList;
-	FrameList   listFrameStatInfo;
-	QMutex      mxStatistic;
-	quint64     nTotalFrameCount;		// 收到的总帧数 | recieve all frames
-	QString     strStatistic;			// 统计信息, 不包括错误  | Statistics, excluding errors
-	bool		bNeedUpdate;
+	FrameList   m_listFrameStatInfo;
+	QMutex      m_mxStatistic;
+	quint64     m_nTotalFrameCount;		// 收到的总帧数 | recieve all frames
+	QString     m_szStatistic;			// 统计信息, 不包括错误  | Statistics, excluding errors
+	bool		m_bNeedUpdate;
 };
 
 #endif // CAMMERWIDGET_H

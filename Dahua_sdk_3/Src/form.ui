@@ -373,6 +373,31 @@
     <string>宽度           *           高度</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButtonReset">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>60</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>重置</string>
+   </property>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

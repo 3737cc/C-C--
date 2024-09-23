@@ -14,9 +14,10 @@
 #define MIN_LEFT_LIST_NUM (2) 
 #define MAX_STATISTIC_INTERVAL (5000000000) // List的更新时与最新一帧的时间最大间隔 |  The maximum time interval between the update of list and the latest frame
 
-int showRate = 30;
-int qwidth = 1920, qheight = 1024;
-int acquisition = 30;
+int g_lShowRate = 30;
+int g_lWidth = 1920, g_lHeight = 1024;
+int g_lAcquisition = 30;
+const float m_fMinScaleFactor = 0.2f;
 
 using namespace Dahua::GenICam;
 using namespace Dahua::Infra;
@@ -24,39 +25,39 @@ using namespace Dahua::Infra;
 CammerWidget::CammerWidget(QWidget* parent) :
 	QWidget(parent)
 	, ui(new Ui::CammerWidget)
-	, thdDisplayThread(CThreadLite::ThreadProc(&CammerWidget::DisplayThreadProc, this), "Display")
-	, nDisplayInterval(0)
-	, nFirstFrameTime(0)
-	, nLastFrameTime(0)
-	, bNeedUpdate(true)
-	, nTotalFrameCount(0),
-	zoomFactor(1.0f),
-	imageSet(false)
+	, m_thdDisplayThread(CThreadLite::ThreadProc(&CammerWidget::DisplayThreadProc, this), "Display")
+	, m_nDisplayInterval(0)
+	, m_nFirstFrameTime(0)
+	, m_nLastFrameTime(0)
+	, m_bNeedUpdate(true)
+	, m_nTotalFrameCount(0),
+	m_fZoomFactor(1.0f),
+	m_bImageSet(false)
 {
 	ui->setupUi(this);
 
 	qRegisterMetaType<uint64_t>("uint64_t");
 	connect(this, SIGNAL(signalShowImage(uint8_t*, int, int, uint64_t)), this, SLOT(ShowImage(uint8_t*, int, int, uint64_t)));
 
-	setDisplayFPS(showRate);
-	elapsedTimer.start();
+	setDisplayFPS(g_lShowRate);
+	m_elapsedTimer.start();
 
 	// 启动显示线程
 	// start display thread
-	if (!thdDisplayThread.isThreadOver())
+	if (!m_thdDisplayThread.isThreadOver())
 	{
-		thdDisplayThread.destroyThread();
+		m_thdDisplayThread.destroyThread();
 	}
-	thdDisplayThread.createThread();
+	m_thdDisplayThread.createThread();
 }
 
 CammerWidget::~CammerWidget()
 {
 	// 关闭显示线程
 	// close display thread
-	if (!thdDisplayThread.isThreadOver())
+	if (!m_thdDisplayThread.isThreadOver())
 	{
-		thdDisplayThread.destroyThread();
+		m_thdDisplayThread.destroyThread();
 	}
 
 	delete ui;
@@ -67,29 +68,29 @@ CammerWidget::~CammerWidget()
 void CammerWidget::FrameCallback(const CFrame& frame)
 {
 	CFrameInfo frameInfo;
-	frameInfo.nWidth = frame.getImageWidth();
-	frameInfo.nHeight = frame.getImageHeight();
-	frameInfo.nBufferSize = frame.getImageSize();
-	frameInfo.nPaddingX = frame.getImagePadddingX();
-	frameInfo.nPaddingY = frame.getImagePadddingY();
-	frameInfo.ePixelType = frame.getImagePixelFormat();
-	frameInfo.pImageBuf = (BYTE*)malloc(sizeof(BYTE) * frameInfo.nBufferSize);
-	frameInfo.nTimeStamp = frame.getImageTimeStamp();
+	frameInfo.m_nWidth = frame.getImageWidth();
+	frameInfo.m_nHeight = frame.getImageHeight();
+	frameInfo.m_nBufferSize = frame.getImageSize();
+	frameInfo.m_nPaddingX = frame.getImagePadddingX();
+	frameInfo.m_nPaddingY = frame.getImagePadddingY();
+	frameInfo.m_ePixelType = frame.getImagePixelFormat();
+	frameInfo.m_pImageBuf = (BYTE*)malloc(sizeof(BYTE) * frameInfo.m_nBufferSize);
+	frameInfo.m_nTimeStamp = frame.getImageTimeStamp();
 
 	// 内存申请失败，直接返回
 	// memory application failed, return directly
-	if (frameInfo.pImageBuf != NULL)
+	if (frameInfo.m_pImageBuf != NULL)
 	{
-		memcpy(frameInfo.pImageBuf, frame.getImage(), frame.getImageSize());
+		memcpy(frameInfo.m_pImageBuf, frame.getImage(), frame.getImageSize());
 
-		if (qDisplayFrameQueue.size() > 16)
+		if (m_qDisplayFrameQueue.size() > 16)
 		{
 			CFrameInfo frameOld;
-			qDisplayFrameQueue.get(frameOld);
-			free(frameOld.pImageBuf);
+			m_qDisplayFrameQueue.get(frameOld);
+			free(frameOld.m_pImageBuf);
 		}
 
-		qDisplayFrameQueue.push_back(frameInfo);
+		m_qDisplayFrameQueue.push_back(frameInfo);
 	}
 
 	recvNewFrame(frame);
@@ -99,34 +100,34 @@ void CammerWidget::FrameCallback(const CFrame& frame)
 void CammerWidget::FrameSingle(const CFrame& frame)
 {
 	CFrameInfo frameInfo;
-	frameInfo.nWidth = frame.getImageWidth();
-	frameInfo.nHeight = frame.getImageHeight();
-	frameInfo.nBufferSize = frame.getImageSize();
-	frameInfo.nPaddingX = frame.getImagePadddingX();
-	frameInfo.nPaddingY = frame.getImagePadddingY();
-	frameInfo.ePixelType = frame.getImagePixelFormat();
-	frameInfo.pImageBuf = (BYTE*)malloc(sizeof(BYTE) * frameInfo.nBufferSize);
-	frameInfo.nTimeStamp = frame.getImageTimeStamp();
+	frameInfo.m_nWidth = frame.getImageWidth();
+	frameInfo.m_nHeight = frame.getImageHeight();
+	frameInfo.m_nBufferSize = frame.getImageSize();
+	frameInfo.m_nPaddingX = frame.getImagePadddingX();
+	frameInfo.m_nPaddingY = frame.getImagePadddingY();
+	frameInfo.m_ePixelType = frame.getImagePixelFormat();
+	frameInfo.m_pImageBuf = (BYTE*)malloc(sizeof(BYTE) * frameInfo.m_nBufferSize);
+	frameInfo.m_nTimeStamp = frame.getImageTimeStamp();
 
 	// 内存申请失败，直接返回
 	// memory application failed, return directly
-	if (frameInfo.pImageBuf != NULL)
+	if (frameInfo.m_pImageBuf != NULL)
 	{
-		memcpy(frameInfo.pImageBuf, frame.getImage(), frame.getImageSize());
+		memcpy(frameInfo.m_pImageBuf, frame.getImage(), frame.getImageSize());
 
 		// 只处理第一帧
-		if (qDisplayFrameQueue.size() == 0)  // 使用 size() 检查是否为空
+		if (m_qDisplayFrameQueue.size() == 0)  // 使用 size() 检查是否为空
 		{
-			qDisplayFrameQueue.push_back(frameInfo);
+			m_qDisplayFrameQueue.push_back(frameInfo);
 			// 停止抓取
-			if (pStreamSource)
+			if (m_pStreamSource)
 			{
-				pStreamSource->stopGrabbing();
+				m_pStreamSource->stopGrabbing();
 			}
 		}
 		else
 		{
-			free(frameInfo.pImageBuf); // 如果有多余的帧数据，释放内存
+			free(frameInfo.m_pImageBuf); // 如果有多余的帧数据，释放内存
 		}
 	}
 
@@ -137,13 +138,13 @@ void CammerWidget::FrameSingle(const CFrame& frame)
 // set exposeTime
 bool CammerWidget::SetExposeTime(double dExposureTime)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("Set ExposureTime fail. No camera or camera is not connected.\n");
 		return false;
 	}
 
-	CDoubleNode nodeExposureTime(pCamera, "ExposureTime");
+	CDoubleNode nodeExposureTime(m_pCamera, "ExposureTime");
 
 	if (false == nodeExposureTime.isValid())
 	{
@@ -170,13 +171,13 @@ bool CammerWidget::SetExposeTime(double dExposureTime)
 // set gain
 bool CammerWidget::SetAdjustPlus(double dGainRaw)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("Set GainRaw fail. No camera or camera is not connected.\n");
 		return false;
 	}
 
-	CDoubleNode nodeGainRaw(pCamera, "GainRaw");
+	CDoubleNode nodeGainRaw(m_pCamera, "GainRaw");
 
 	if (false == nodeGainRaw.isValid())
 	{
@@ -203,19 +204,19 @@ bool CammerWidget::SetAdjustPlus(double dGainRaw)
 // open camera
 bool CammerWidget::CameraOpen(void)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("connect camera fail. No camera.\n");
 		return false;
 	}
 
-	if (true == pCamera->isConnected())
+	if (true == m_pCamera->isConnected())
 	{
 		printf("camera is already connected.\n");
 		return true;
 	}
 
-	if (false == pCamera->connect())
+	if (false == m_pCamera->connect())
 	{
 		printf("connect camera fail.\n");
 		return false;
@@ -228,19 +229,19 @@ bool CammerWidget::CameraOpen(void)
 // close camera
 bool CammerWidget::CameraClose(void)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("disconnect camera fail. No camera.\n");
 		return false;
 	}
 
-	if (false == pCamera->isConnected())
+	if (false == m_pCamera->isConnected())
 	{
 		printf("camera is already disconnected.\n");
 		return true;
 	}
 
-	if (false == pCamera->disConnect())
+	if (false == m_pCamera->disConnect())
 	{
 		printf("disconnect camera fail.\n");
 		return false;
@@ -253,28 +254,28 @@ bool CammerWidget::CameraClose(void)
 // start grabbing
 bool CammerWidget::CameraStart()
 {
-	if (NULL == pStreamSource)
+	if (NULL == m_pStreamSource)
 	{
-		pStreamSource = CSystem::getInstance().createStreamSource(pCamera);
+		m_pStreamSource = CSystem::getInstance().createStreamSource(m_pCamera);
 	}
 
-	if (NULL == pStreamSource)
+	if (NULL == m_pStreamSource)
 	{
 		return false;
 	}
 
-	if (pStreamSource->isGrabbing())
+	if (m_pStreamSource->isGrabbing())
 	{
 		return true;
 	}
 
-	bool bRet = pStreamSource->attachGrabbing(IStreamSource::Proc(&CammerWidget::FrameCallback, this));
+	bool bRet = m_pStreamSource->attachGrabbing(IStreamSource::Proc(&CammerWidget::FrameCallback, this));
 	if (!bRet)
 	{
 		return false;
 	}
 
-	if (!pStreamSource->startGrabbing())
+	if (!m_pStreamSource->startGrabbing())
 	{
 		return false;
 	}
@@ -285,28 +286,28 @@ bool CammerWidget::CameraStart()
 //单张采集
 bool CammerWidget::CaptureSingleImage()
 {
-	if (NULL == pStreamSource)
+	if (NULL == m_pStreamSource)
 	{
-		pStreamSource = CSystem::getInstance().createStreamSource(pCamera);
+		m_pStreamSource = CSystem::getInstance().createStreamSource(m_pCamera);
 	}
 
-	if (NULL == pStreamSource)
+	if (NULL == m_pStreamSource)
 	{
 		return false;
 	}
 
-	if (pStreamSource->isGrabbing())
+	if (m_pStreamSource->isGrabbing())
 	{
 		return true;
 	}
 
-	bool bRet = pStreamSource->attachGrabbing(IStreamSource::Proc(&CammerWidget::FrameSingle, this));
+	bool bRet = m_pStreamSource->attachGrabbing(IStreamSource::Proc(&CammerWidget::FrameSingle, this));
 	if (!bRet)
 	{
 		return false;
 	}
 
-	if (!pStreamSource->startGrabbing())
+	if (!m_pStreamSource->startGrabbing())
 	{
 		return false;
 	}
@@ -319,17 +320,17 @@ bool CammerWidget::CaptureSingleImage()
 // stop grabbing
 bool CammerWidget::CameraStop()
 {
-	if (pStreamSource != NULL)
+	if (m_pStreamSource != NULL)
 	{
-		pStreamSource->detachGrabbing(IStreamSource::Proc(&CammerWidget::FrameCallback, this));
+		m_pStreamSource->detachGrabbing(IStreamSource::Proc(&CammerWidget::FrameCallback, this));
 
-		pStreamSource->stopGrabbing();
-		pStreamSource.reset();
+		m_pStreamSource->stopGrabbing();
+		m_pStreamSource.reset();
 	}
 
 	// 清空显示队列 
 	// clear display queue
-	qDisplayFrameQueue.clear();
+	m_qDisplayFrameQueue.clear();
 
 	return true;
 }
@@ -338,7 +339,7 @@ bool CammerWidget::CameraStop()
 // Switch acquisition mode and triggering mode (continuous acquisition, external triggering and software triggering)
 bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("Change Trig fail. No camera or camera is not connected.\n");
 		return false;
@@ -348,7 +349,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 	{
 		// 设置触发模式
 		// set trigger mode
-		CEnumNode nodeTriggerMode(pCamera, "TriggerMode");
+		CEnumNode nodeTriggerMode(m_pCamera, "TriggerMode");
 		if (false == nodeTriggerMode.isValid())
 		{
 			printf("get TriggerMode node fail.\n");
@@ -364,7 +365,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 	{
 		// 设置触发器
 		// set trigger
-		CEnumNode nodeTriggerSelector(pCamera, "TriggerSelector");
+		CEnumNode nodeTriggerSelector(m_pCamera, "TriggerSelector");
 		if (false == nodeTriggerSelector.isValid())
 		{
 			printf("get TriggerSelector node fail.\n");
@@ -378,7 +379,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 
 		// 设置触发模式
 		// set trigger mode
-		CEnumNode nodeTriggerMode(pCamera, "TriggerMode");
+		CEnumNode nodeTriggerMode(m_pCamera, "TriggerMode");
 		if (false == nodeTriggerMode.isValid())
 		{
 			printf("get TriggerMode node fail.\n");
@@ -392,7 +393,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 
 		// 设置触发源为软触发
 		// set triggerSource as software trigger
-		CEnumNode nodeTriggerSource(pCamera, "TriggerSource");
+		CEnumNode nodeTriggerSource(m_pCamera, "TriggerSource");
 		if (false == nodeTriggerSource.isValid())
 		{
 			printf("get TriggerSource node fail.\n");
@@ -408,7 +409,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 	{
 		// 设置触发器
 		// set trigger
-		CEnumNode nodeTriggerSelector(pCamera, "TriggerSelector");
+		CEnumNode nodeTriggerSelector(m_pCamera, "TriggerSelector");
 		if (false == nodeTriggerSelector.isValid())
 		{
 			printf("get TriggerSelector node fail.\n");
@@ -422,7 +423,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 
 		// 设置触发模式
 		// set trigger mode
-		CEnumNode nodeTriggerMode(pCamera, "TriggerMode");
+		CEnumNode nodeTriggerMode(m_pCamera, "TriggerMode");
 		if (false == nodeTriggerMode.isValid())
 		{
 			printf("get TriggerMode node fail.\n");
@@ -436,7 +437,7 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 
 		// 设置触发源为Line1触发
 		// set trigggerSource as Line1 trigger 
-		CEnumNode nodeTriggerSource(pCamera, "TriggerSource");
+		CEnumNode nodeTriggerSource(m_pCamera, "TriggerSource");
 		if (false == nodeTriggerSource.isValid())
 		{
 			printf("get TriggerSource node fail.\n");
@@ -456,13 +457,13 @@ bool CammerWidget::CameraChangeTrig(ETrigType trigType)
 // execute one software trigger
 bool CammerWidget::ExecuteSoftTrig(void)
 {
-	if (NULL == pCamera)
+	if (NULL == m_pCamera)
 	{
 		printf("Set GainRaw fail. No camera or camera is not connected.\n");
 		return false;
 	}
 
-	CCmdNode nodeTriggerSoftware(pCamera, "TriggerSoftware");
+	CCmdNode nodeTriggerSoftware(m_pCamera, "TriggerSoftware");
 	if (false == nodeTriggerSoftware.isValid())
 	{
 		printf("get TriggerSoftware node fail.\n");
@@ -483,9 +484,9 @@ bool CammerWidget::ExecuteSoftTrig(void)
 void CammerWidget::SetCamera(const QString& strKey)
 {
 	CSystem& systemObj = CSystem::getInstance();
-	pCamera = systemObj.getCameraPtr(strKey.toStdString().c_str());
-	sptrFormatControl = systemObj.createImageFormatControl(pCamera);
-	acquisitionControl = systemObj.createAcquisitionControl(pCamera);
+	m_pCamera = systemObj.getCameraPtr(strKey.toStdString().c_str());
+	m_pSptrFormatControl = systemObj.createImageFormatControl(m_pCamera);
+	m_pAcquisitionControl = systemObj.createAcquisitionControl(m_pCamera);
 }
 
 // 显示
@@ -503,19 +504,18 @@ bool CammerWidget::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uin
 	// 创建图像并赋值给成员变量
 	if (Dahua::GenICam::gvspPixelMono8 == nPixelFormat)
 	{
-		image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_Grayscale8);
+		m_aImage = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_Grayscale8);
 	}
 	else
 	{
-		image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_RGB888);
+		m_aImage = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_RGB888);
 	}
 
-	//targetRect = QRectF(0, 0, nWidth * scaleFactor, nHeight * scaleFactor);
-	//sourceRect = QRectF(0, 0, nWidth, nHeight); // 确保源矩形与图像匹配
-	if (!imageSet) {
-		setImage(image);
-		imageSet = true; // 更新标志，表示图像已经设置过
+	if (!m_bImageSet) {
+		setImage(m_aImage);
+		m_bImageSet = true; // 更新标志，表示图像已经设置过
 	}
+	update();
 	return true;
 }
 
@@ -527,7 +527,7 @@ void CammerWidget::DisplayThreadProc(Dahua::Infra::CThreadLite& lite)
 	{
 		CFrameInfo frameInfo;
 
-		if (false == qDisplayFrameQueue.get(frameInfo, 500))
+		if (false == m_qDisplayFrameQueue.get(frameInfo, 500))
 		{
 			continue;
 		}
@@ -538,17 +538,17 @@ void CammerWidget::DisplayThreadProc(Dahua::Infra::CThreadLite& lite)
 		{
 			// 释放内存
 			// release memory
-			free(frameInfo.pImageBuf);
+			free(frameInfo.m_pImageBuf);
 			continue;
 		}
 
 		// mono8格式可不做转码，直接显示，其他格式需要经过转码才能显示 
 		// mono8 format can be displayed directly without transcoding. Other formats can be displayed only after transcoding
-		if (Dahua::GenICam::gvspPixelMono8 == frameInfo.ePixelType)
+		if (Dahua::GenICam::gvspPixelMono8 == frameInfo.m_ePixelType)
 		{
 			// 显示线程中发送显示信号，在主线程中显示图像
 			// Send display signal in display thread and display image in main thread
-			emit signalShowImage(frameInfo.pImageBuf, frameInfo.nWidth, frameInfo.nHeight, frameInfo.ePixelType);
+			emit signalShowImage(frameInfo.m_pImageBuf, frameInfo.m_nWidth, frameInfo.m_nHeight, frameInfo.m_ePixelType);
 
 		}
 		else
@@ -557,39 +557,39 @@ void CammerWidget::DisplayThreadProc(Dahua::Infra::CThreadLite& lite)
 			// transcoding
 			uint8_t* pRGBbuffer = NULL;
 			int nRgbBufferSize = 0;
-			nRgbBufferSize = frameInfo.nWidth * frameInfo.nHeight * 3;
+			nRgbBufferSize = frameInfo.m_nWidth * frameInfo.m_nHeight * 3;
 			pRGBbuffer = (uint8_t*)malloc(nRgbBufferSize);
 			if (pRGBbuffer == NULL)
 			{
 				// 释放内存
 				// release memory
-				free(frameInfo.pImageBuf);
+				free(frameInfo.m_pImageBuf);
 				printf("RGBbuffer malloc failed.\n");
 				continue;
 			}
 
 			IMGCNV_SOpenParam openParam;
-			openParam.width = frameInfo.nWidth;
-			openParam.height = frameInfo.nHeight;
-			openParam.paddingX = frameInfo.nPaddingX;
-			openParam.paddingY = frameInfo.nPaddingY;
-			openParam.dataSize = frameInfo.nBufferSize;
-			openParam.pixelForamt = frameInfo.ePixelType;
+			openParam.width = frameInfo.m_nWidth;
+			openParam.height = frameInfo.m_nHeight;
+			openParam.paddingX = frameInfo.m_nPaddingX;
+			openParam.paddingY = frameInfo.m_nPaddingY;
+			openParam.dataSize = frameInfo.m_nBufferSize;
+			openParam.pixelForamt = frameInfo.m_ePixelType;
 
-			IMGCNV_EErr status = IMGCNV_ConvertToRGB24(frameInfo.pImageBuf, &openParam, pRGBbuffer, &nRgbBufferSize);
+			IMGCNV_EErr status = IMGCNV_ConvertToRGB24(frameInfo.m_pImageBuf, &openParam, pRGBbuffer, &nRgbBufferSize);
 			if (IMGCNV_SUCCESS != status)
 			{
 				// 释放内存 
 				// release memory
 				printf("IMGCNV_ConvertToRGB24 failed.\n");
-				free(frameInfo.pImageBuf);
+				free(frameInfo.m_pImageBuf);
 				free(pRGBbuffer);
 				return;
 			}
 
 			// 释放内存
 			// release memory
-			free(frameInfo.pImageBuf);
+			free(frameInfo.m_pImageBuf);
 
 			// 显示线程中发送显示信号，在主线程中显示图像
 			// Send display signal in display thread and display image in main thread
@@ -601,41 +601,41 @@ void CammerWidget::DisplayThreadProc(Dahua::Infra::CThreadLite& lite)
 
 bool CammerWidget::isTimeToDisplay()
 {
-	CGuard guard(mxTime);
+	CGuard guard(m_mxTime);
 
 	// 不显示
 	// don't display
-	if (nDisplayInterval <= 0)
+	if (m_nDisplayInterval <= 0)
 	{
 		return false;
 	}
 
 	// 第一帧必须显示
 	// the frist frame must be displayed
-	if (nFirstFrameTime == 0 || nLastFrameTime == 0)
+	if (m_nFirstFrameTime == 0 || m_nLastFrameTime == 0)
 	{
-		nFirstFrameTime = elapsedTimer.nsecsElapsed();
-		nLastFrameTime = nFirstFrameTime;
+		m_nFirstFrameTime = m_elapsedTimer.nsecsElapsed();
+		m_nLastFrameTime = m_nFirstFrameTime;
 
 		return true;
 	}
 
 	// 当前帧和上一帧的间隔如果大于显示间隔就显示
 	// display if the interval between the current frame and the previous frame is greater than the display interval
-	uint64_t nCurTimeTmp = elapsedTimer.nsecsElapsed();
-	uint64_t nAcquisitionInterval = nCurTimeTmp - nLastFrameTime;
-	if (nAcquisitionInterval > nDisplayInterval)
+	uint64_t nCurTimeTmp = m_elapsedTimer.nsecsElapsed();
+	uint64_t nAcquisitionInterval = nCurTimeTmp - m_nLastFrameTime;
+	if (nAcquisitionInterval > m_nDisplayInterval)
 	{
-		nLastFrameTime = nCurTimeTmp;
+		m_nLastFrameTime = nCurTimeTmp;
 		return true;
 	}
 
 	// 当前帧相对于第一帧的时间间隔
 	// Time interval between the current frame and the first frame
-	uint64_t nPre = (nLastFrameTime - nFirstFrameTime) % nDisplayInterval;
-	if (nPre + nAcquisitionInterval > nDisplayInterval)
+	uint64_t nPre = (m_nLastFrameTime - m_nFirstFrameTime) % m_nDisplayInterval;
+	if (nPre + nAcquisitionInterval > m_nDisplayInterval)
 	{
-		nLastFrameTime = nCurTimeTmp;
+		m_nLastFrameTime = nCurTimeTmp;
 		return true;
 	}
 
@@ -646,17 +646,17 @@ bool CammerWidget::isTimeToDisplay()
 // set display frequency
 void CammerWidget::setDisplayFPS(int nFPS)
 {
-	showRate = nFPS;
-	if (showRate > 0)
+	g_lShowRate = nFPS;
+	if (g_lShowRate > 0)
 	{
-		CGuard guard(mxTime);
+		CGuard guard(m_mxTime);
 
-		nDisplayInterval = 1000 * 1000 * 1000.0 / showRate;
+		m_nDisplayInterval = 1000 * 1000 * 1000.0 / g_lShowRate;
 	}
 	else
 	{
-		CGuard guard(mxTime);
-		nDisplayInterval = 0;
+		CGuard guard(m_mxTime);
+		m_nDisplayInterval = 0;
 	}
 }
 
@@ -664,60 +664,60 @@ void CammerWidget::setDisplayFPS(int nFPS)
 // window close response function
 void CammerWidget::closeEvent(QCloseEvent* event)
 {
-	if (NULL != pStreamSource && pStreamSource->isGrabbing())
-		pStreamSource->stopGrabbing();
-	if (NULL != pCamera && pCamera->isConnected())
-		pCamera->disConnect();
+	if (NULL != m_pStreamSource && m_pStreamSource->isGrabbing())
+		m_pStreamSource->stopGrabbing();
+	if (NULL != m_pCamera && m_pCamera->isConnected())
+		m_pCamera->disConnect();
 }
 
 // 状态栏统计信息 开始
 // Status bar statistics begin
 void CammerWidget::resetStatistic()
 {
-	QMutexLocker locker(&mxStatistic);
-	nTotalFrameCount = 0;
-	listFrameStatInfo.clear();
-	bNeedUpdate = true;
+	QMutexLocker locker(&m_mxStatistic);
+	m_nTotalFrameCount = 0;
+	m_listFrameStatInfo.clear();
+	m_bNeedUpdate = true;
 }
 QString CammerWidget::getStatistic()
 {
-	if (mxStatistic.tryLock(30))
+	if (m_mxStatistic.tryLock(30))
 	{
-		if (bNeedUpdate)
+		if (m_bNeedUpdate)
 		{
 			updateStatistic();
 		}
 
-		mxStatistic.unlock();
-		return strStatistic;
+		m_mxStatistic.unlock();
+		return m_szStatistic;
 	}
 	return "";
 }
 void CammerWidget::updateStatistic()
 {
-	size_t nFrameCount = listFrameStatInfo.size();
+	size_t nFrameCount = m_listFrameStatInfo.size();
 	QString strFPS = DEFAULT_ERROR_STRING;
 	QString strSpeed = DEFAULT_ERROR_STRING;
 
 	if (nFrameCount > 1)
 	{
 		quint64 nTotalSize = 0;
-		FrameList::const_iterator it = listFrameStatInfo.begin();
+		FrameList::const_iterator it = m_listFrameStatInfo.begin();
 
-		if (listFrameStatInfo.size() == 2)
+		if (m_listFrameStatInfo.size() == 2)
 		{
-			nTotalSize = listFrameStatInfo.back().m_nFrameSize;
+			nTotalSize = m_listFrameStatInfo.back().m_nFrameSize;
 		}
 		else
 		{
-			for (++it; it != listFrameStatInfo.end(); ++it)
+			for (++it; it != m_listFrameStatInfo.end(); ++it)
 			{
 				nTotalSize += it->m_nFrameSize;
 			}
 		}
 
-		const FrameStatInfo& first = listFrameStatInfo.front();
-		const FrameStatInfo& last = listFrameStatInfo.back();
+		const FrameStatInfo& first = m_listFrameStatInfo.front();
+		const FrameStatInfo& last = m_listFrameStatInfo.back();
 
 		qint64 nsecs = last.m_nPassTime - first.m_nPassTime;
 
@@ -730,45 +730,45 @@ void CammerWidget::updateStatistic()
 		}
 	}
 
-	strStatistic = QString("Stream: %1 images   %2 FPS   %3 Mbps")
-		.arg(nTotalFrameCount)
+	m_szStatistic = QString("Stream: %1 images   %2 FPS   %3 Mbps")
+		.arg(m_nTotalFrameCount)
 		.arg(strFPS)
 		.arg(strSpeed);
-	bNeedUpdate = false;
+	m_bNeedUpdate = false;
 }
 void CammerWidget::recvNewFrame(const CFrame& pBuf)
 {
-	QMutexLocker locker(&mxStatistic);
-	if (listFrameStatInfo.size() >= MAX_FRAME_STAT_NUM)
+	QMutexLocker locker(&m_mxStatistic);
+	if (m_listFrameStatInfo.size() >= MAX_FRAME_STAT_NUM)
 	{
-		listFrameStatInfo.pop_front();
+		m_listFrameStatInfo.pop_front();
 	}
-	listFrameStatInfo.push_back(FrameStatInfo(pBuf.getImageSize(), elapsedTimer.nsecsElapsed()));
-	++nTotalFrameCount;
+	m_listFrameStatInfo.push_back(FrameStatInfo(pBuf.getImageSize(), m_elapsedTimer.nsecsElapsed()));
+	++m_nTotalFrameCount;
 
-	if (listFrameStatInfo.size() > MIN_LEFT_LIST_NUM)
+	if (m_listFrameStatInfo.size() > MIN_LEFT_LIST_NUM)
 	{
-		FrameStatInfo infoFirst = listFrameStatInfo.front();
-		FrameStatInfo infoLast = listFrameStatInfo.back();
-		while (listFrameStatInfo.size() > MIN_LEFT_LIST_NUM && infoLast.m_nPassTime - infoFirst.m_nPassTime > MAX_STATISTIC_INTERVAL)
+		FrameStatInfo infoFirst = m_listFrameStatInfo.front();
+		FrameStatInfo infoLast = m_listFrameStatInfo.back();
+		while (m_listFrameStatInfo.size() > MIN_LEFT_LIST_NUM && infoLast.m_nPassTime - infoFirst.m_nPassTime > MAX_STATISTIC_INTERVAL)
 		{
-			listFrameStatInfo.pop_front();
-			infoFirst = listFrameStatInfo.front();
+			m_listFrameStatInfo.pop_front();
+			infoFirst = m_listFrameStatInfo.front();
 		}
 	}
 
-	bNeedUpdate = true;
+	m_bNeedUpdate = true;
 }
 
 // 更新帧率
 void CammerWidget::updateShowRate(double value)
 {
 	double maxFrameRate = 2000.0;
-	acquisition = value;
-	CDoubleNode frameRate = acquisitionControl->acquisitionFrameRate();
-	CBoolNode frameRateEnableNode = acquisitionControl->acquisitionFrameRateEnable();
-	if (acquisition < maxFrameRate) {
-		frameRate.setValue(acquisition);
+	g_lAcquisition = value;
+	CDoubleNode frameRate = m_pAcquisitionControl->acquisitionFrameRate();
+	CBoolNode frameRateEnableNode = m_pAcquisitionControl->acquisitionFrameRateEnable();
+	if (g_lAcquisition < maxFrameRate) {
+		frameRate.setValue(g_lAcquisition);
 	}
 	else {
 		frameRate.setValue(maxFrameRate);
@@ -776,44 +776,32 @@ void CammerWidget::updateShowRate(double value)
 	frameRateEnableNode.setValue(true);
 }
 
-//缩放
-void CammerWidget::zoomIn() {
-	// 增加缩放因子
-	zoomFactor *= 1.1;
-	update();
-}
-
-void CammerWidget::zoomOut() {
-	// 减少缩放因子
-	zoomFactor /= 1.1;
-	update();
-}
-
+//设置分辨率
 void CammerWidget::resolution(int width, int height)
 {
-	qwidth = width;
-	qheight = height;
+	g_lWidth = width;
+	g_lHeight = height;
 	// 获取宽度和高度节点
-	CIntNode nodeWidth = sptrFormatControl->width();
-	CIntNode nodeHeight = sptrFormatControl->height();
-	nodeWidth.setValue(qwidth);
-	nodeHeight.setValue(qheight);
+	CIntNode nodeWidth = m_pSptrFormatControl->width();
+	CIntNode nodeHeight = m_pSptrFormatControl->height();
+	nodeWidth.setValue(g_lWidth);
+	nodeHeight.setValue(g_lHeight);
 }
 
 //重绘
 void CammerWidget::setImage(const QImage& newImage)
 {
-	image = newImage;
+	m_aImage = newImage;
 
-	if (!image.isNull()) {
+	if (!m_aImage.isNull()) {
 		// 计算适合小部件的缩放因子
-		float widthScale = width() / static_cast<float>(image.width());
-		float heightScale = height() / static_cast<float>(image.height());
-		scaleFactor = qMin(widthScale, heightScale); // 选择较小的缩放因子，保持图像比例
+		float widthScale = width() / static_cast<float>(m_aImage.width());
+		float heightScale = height() / static_cast<float>(m_aImage.height());
+		m_fScaleFactor = qMin(widthScale, heightScale); // 选择较小的缩放因子，保持图像比例
 
 		// 设置偏移为0，以确保图像在小部件中居中
-		imageOffset = QPointF((width() - image.width() * scaleFactor) / 2,
-			(height() - image.height() * scaleFactor) / 2);
+		m_pImageOffset = QPointF((width() - m_aImage.width() * m_fScaleFactor) / 2,
+			(height() - m_aImage.height() * m_fScaleFactor) / 2);
 	}
 	update(); // 更新小部件以触发重绘
 }
@@ -821,12 +809,12 @@ void CammerWidget::setImage(const QImage& newImage)
 void CammerWidget::paintEvent(QPaintEvent* event)
 {
 	QPainter painter(this);
-	if (!image.isNull()) {
+	if (!m_aImage.isNull()) {
 		// 计算缩放后的图像大小
-		QSizeF scaledSize = image.size() * scaleFactor;
-		QPointF topLeft = -imageOffset; // 使用 (0, 0) 作为起点
+		QSizeF scaledSize = m_aImage.size() * m_fScaleFactor;
+		QPointF topLeft = -m_pImageOffset;
 		QRectF drawRect(topLeft, scaledSize);
-		painter.drawImage(drawRect, image);
+		painter.drawImage(drawRect, m_aImage);
 	}
 }
 
@@ -834,39 +822,48 @@ void CammerWidget::paintEvent(QPaintEvent* event)
 void CammerWidget::mousePressEvent(QMouseEvent* event)
 {
 	QPointF clickPos = event->pos();
+	QPointF relativePos = clickPos - (-m_pImageOffset); // 以 (0, 0) 作为中心
 
-	// 计算鼠标点击位置相对于图像中心的偏移
-	QPointF relativePos = clickPos - (-imageOffset); // 以 (0, 0) 作为中心
+	float oldScaleFactor = m_fScaleFactor;
+	m_fScaleFactor *= 1.1f; // 放大1.1倍
 
-	// 更新缩放因子
-	float oldScaleFactor = scaleFactor;
-	scaleFactor *= 1.1f; // 放大1.1倍
+	// 确保 scaleFactor 不小于 minScaleFactor
+	if (m_fScaleFactor < m_fMinScaleFactor) {
+		m_fScaleFactor = m_fMinScaleFactor;
+	}
 
-	// 更新偏移，保持鼠标位置不变
-	imageOffset = (relativePos * (scaleFactor / oldScaleFactor)) - relativePos + imageOffset;
+	m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
 
 	update(); // 更新小部件以触发重绘
 }
+
 void CammerWidget::wheelEvent(QWheelEvent* event)
 {
 	QPointF mousePos = event->position();
+	QPointF relativePos = mousePos - (-m_pImageOffset); // 以 (0, 0) 作为中心
 
-	// 计算鼠标位置相对于图像中心的偏移
-	QPointF relativePos = mousePos - (-imageOffset); // 以 (0, 0) 作为中心
-
-	// 更新缩放因子
-	float oldScaleFactor = scaleFactor;
+	float oldScaleFactor = m_fScaleFactor;
 	if (event->angleDelta().y() > 0) {
-		scaleFactor *= 1.1f; // 放大
+		m_fScaleFactor *= 1.1f; // 放大
 	}
 	else {
-		scaleFactor /= 1.1f; // 缩小
+		m_fScaleFactor /= 1.1f; // 缩小
 	}
 
-	// 更新偏移，保持鼠标位置不变
-	imageOffset = (relativePos * (scaleFactor / oldScaleFactor)) - relativePos + imageOffset;
+	// 确保 scaleFactor 不小于 minScaleFactor
+	if (m_fScaleFactor < m_fMinScaleFactor) {
+		m_fScaleFactor = m_fMinScaleFactor;
+	}
+
+	m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
 
 	update(); // 更新小部件以触发重绘
+}
+
+void CammerWidget::resetImage()
+{
+	// 重置图像
+	setImage(m_aImage); // 假设 originalImage 是原始图像
 }
 
 // 状态栏统计信息 end 
