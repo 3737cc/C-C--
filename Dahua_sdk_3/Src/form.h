@@ -37,7 +37,6 @@ private slots:
 	void on_pushButtonResolution_clicked();
 	void on_lineEditRote_editingFinished();
 	void on_lineEditGain_editingFinished();
-	void wheelEvent(QWheelEvent* event);
 	void on_horizontalSliderExposure_valueChanged(int value);
 	void on_lineEditExposure_editingFinished();
 	void on_pushButtonOnestart_clicked();

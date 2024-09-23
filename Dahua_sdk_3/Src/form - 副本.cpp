@@ -232,3 +232,33 @@ void Form::on_pushButtonResolution_clicked()
 
 	ui->widget->resolution(on_Width, on_Height);
 }
+
+//显示的放大与缩小
+void Form::wheelEvent(QWheelEvent* event) {
+	QPointF mousePos = ui->widget->mapFromGlobal(event->globalPos());
+
+	// 计算放大或缩小的因子
+	double zoomFactorChange = (event->angleDelta().y() > 0) ? 1.1 : 1.0 / 1.1;
+	double oldZoomFactor = zoomFactor;
+	zoomFactor *= zoomFactorChange;
+
+	// 计算缩放前后图像中心的变化
+	QPointF imageCenter = ui->widget->getImageCenter(); // 获取图像中心位置
+	QPointF newCenter = ui->widget->getScaledPosition(mousePos, oldZoomFactor, zoomFactor); // 计算新的图像中心
+
+	// 更新视图平移
+	QPointF translation = newCenter - imageCenter; // 计算需要的平移量
+	ui->widget->translate(translation.x(), translation.y()); // 应用平移
+
+	if (event->angleDelta().y() > 0) {
+		ui->widget->zoomIn(); // 放大
+	}
+	else {
+		ui->widget->zoomOut(); // 缩小
+	}
+
+	event->accept();
+}
+
+
+

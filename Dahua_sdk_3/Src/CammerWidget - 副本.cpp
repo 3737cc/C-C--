@@ -1,12 +1,6 @@
 #include "CammerWidget.h"
 #include "ui_cammerwidget.h"
-#include "GenICam/System.h"
-#include "GenICam/Camera.h"
-#include "GenICam/StreamSource.h"
-#include <qpainter>
-#include <QMouseEvent>
-#include <QWheelEvent>
-
+#include "qdebug"
 
 /*#define DEFAULT_SHOW_RATE (60)*/ // 默认显示帧率 | defult display frequency
 #define DEFAULT_ERROR_STRING ("N/A") 
@@ -30,11 +24,9 @@ CammerWidget::CammerWidget(QWidget* parent) :
 	, nLastFrameTime(0)
 	, bNeedUpdate(true)
 	, nTotalFrameCount(0),
-	zoomFactor(1.0f),
-	imageSet(false)
+	zoomFactor(1.0f)
 {
 	ui->setupUi(this);
-
 	qRegisterMetaType<uint64_t>("uint64_t");
 	connect(this, SIGNAL(signalShowImage(uint8_t*, int, int, uint64_t)), this, SLOT(ShowImage(uint8_t*, int, int, uint64_t)));
 
@@ -486,21 +478,29 @@ void CammerWidget::SetCamera(const QString& strKey)
 	pCamera = systemObj.getCameraPtr(strKey.toStdString().c_str());
 	sptrFormatControl = systemObj.createImageFormatControl(pCamera);
 	acquisitionControl = systemObj.createAcquisitionControl(pCamera);
+	// 初始化场景
+	scenePointer = new QGraphicsScene(this);
+
+	// 创建并关联视图
+	QGraphicsView* view = new QGraphicsView(this);
+	view->setScene(scenePointer);
 }
 
 // 显示
 // diaplay
 bool CammerWidget::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat)
 {
+
 	// 默认显示30帧
-	// default display 30 frames 
-	if (NULL == pRgbFrameBuf || nWidth == 0 || nHeight == 0)
+	// defult display 30 frames 
+	QImage image;
+	if (NULL == pRgbFrameBuf ||
+		nWidth == 0 ||
+		nHeight == 0)
 	{
 		printf("%s image is invalid.\n", __FUNCTION__);
 		return false;
 	}
-
-	// 创建图像并赋值给成员变量
 	if (Dahua::GenICam::gvspPixelMono8 == nPixelFormat)
 	{
 		image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_Grayscale8);
@@ -509,13 +509,14 @@ bool CammerWidget::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uin
 	{
 		image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_RGB888);
 	}
+	//进行缩放处理
+	QSize scaledSize(nWidth * zoomFactor, nHeight * zoomFactor);
+	QImage imageScale = image.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	//QImage imageScale = image.scaled(QSize(ui->label_Pixmap->width(), ui->label_Pixmap->height()));
+	QPixmap pixmap = QPixmap::fromImage(imageScale);
+	ui->label_Pixmap->setPixmap(pixmap);
+	free(pRgbFrameBuf);
 
-	//targetRect = QRectF(0, 0, nWidth * scaleFactor, nHeight * scaleFactor);
-	//sourceRect = QRectF(0, 0, nWidth, nHeight); // 确保源矩形与图像匹配
-	if (!imageSet) {
-		setImage(image);
-		imageSet = true; // 更新标志，表示图像已经设置过
-	}
 	return true;
 }
 
@@ -789,6 +790,7 @@ void CammerWidget::zoomOut() {
 	update();
 }
 
+//设置分辨率
 void CammerWidget::resolution(int width, int height)
 {
 	qwidth = width;
@@ -800,73 +802,96 @@ void CammerWidget::resolution(int width, int height)
 	nodeHeight.setValue(qheight);
 }
 
-//重绘
-void CammerWidget::setImage(const QImage& newImage)
-{
-	image = newImage;
+// 获取中心点
+QPointF CammerWidget::getImageCenter() {
+	// 获取图像的宽度和高度
+	CIntNode nodeWidth = sptrFormatControl->width();
+	CIntNode nodeHeight = sptrFormatControl->height();
 
-	if (!image.isNull()) {
-		// 计算适合小部件的缩放因子
-		float widthScale = width() / static_cast<float>(image.width());
-		float heightScale = height() / static_cast<float>(image.height());
-		scaleFactor = qMin(widthScale, heightScale); // 选择较小的缩放因子，保持图像比例
+	int64_t widthValue = 0;
+	int64_t heightValue = 0;
 
-		// 设置偏移为0，以确保图像在小部件中居中
-		imageOffset = QPointF((width() - image.width() * scaleFactor) / 2,
-			(height() - image.height() * scaleFactor) / 2);
+	// 使用 getValue 方法获取属性值
+	if (!nodeWidth.getValue(widthValue) || !nodeHeight.getValue(heightValue)) {
+		// 处理获取失败的情况，例如返回默认值
+		return QPointF(0.0, 0.0);
 	}
-	update(); // 更新小部件以触发重绘
+
+	// 将宽度和高度转换为 double 类型
+	double width = static_cast<double>(widthValue);
+	double height = static_cast<double>(heightValue);
+
+	// 返回中心点坐标
+	return QPointF(width / 2.0, height / 2.0);
 }
 
-void CammerWidget::paintEvent(QPaintEvent* event)
-{
-	QPainter painter(this);
-	if (!image.isNull()) {
-		// 计算缩放后的图像大小
-		QSizeF scaledSize = image.size() * scaleFactor;
-		QPointF topLeft = -imageOffset; // 使用 (0, 0) 作为起点
-		QRectF drawRect(topLeft, scaledSize);
-		painter.drawImage(drawRect, image);
-	}
+//鼠标对应图像位置
+QPointF CammerWidget::getScaledPosition(QPointF mousePos, double oldZoom, double newZoom) {
+	// 将鼠标坐标从 widget 坐标系转换为图像坐标系
+	QPointF imagePos = mapToImageCoordinates(mousePos);
+
+	// 计算缩放前后的位置变化
+	double scaleFactor = newZoom / oldZoom;
+	QPointF newImagePos = (imagePos - getImageCenter()) * scaleFactor + getImageCenter();
+
+	return newImagePos;
 }
 
-//捕获鼠标点击位置
-void CammerWidget::mousePressEvent(QMouseEvent* event)
-{
-	QPointF clickPos = event->pos();
+//转换坐标
+QPointF CammerWidget::mapToImageCoordinates(QPointF widgetPos) {
+	CIntNode nodeWidth = sptrFormatControl->width();
+	CIntNode nodeHeight = sptrFormatControl->height();
 
-	// 计算鼠标点击位置相对于图像中心的偏移
-	QPointF relativePos = clickPos - (-imageOffset); // 以 (0, 0) 作为中心
+	int64_t widthValue = 0;
+	int64_t heightValue = 0;
 
-	// 更新缩放因子
-	float oldScaleFactor = scaleFactor;
-	scaleFactor *= 1.1f; // 放大1.1倍
+	// 使用 getValue 方法获取属性值
+	if (!nodeWidth.getValue(widthValue) || !nodeHeight.getValue(heightValue)) {
+		// 处理获取失败的情况，例如返回默认值
+		return QPointF(0.0, 0.0);
+	}
 
-	// 更新偏移，保持鼠标位置不变
-	imageOffset = (relativePos * (scaleFactor / oldScaleFactor)) - relativePos + imageOffset;
+	// 将宽度和高度转换为 double 类型
+	double imageWidth = static_cast<double>(widthValue);
+	double imageHeight = static_cast<double>(heightValue);
+	double widgetWidth = width();
+	double widgetHeight = height();
 
-	update(); // 更新小部件以触发重绘
+	double x = (widgetPos.x() / widgetWidth) * imageWidth;
+	double y = (widgetPos.y() / widgetHeight) * imageHeight;
+
+	return QPointF(x, y);
 }
-void CammerWidget::wheelEvent(QWheelEvent* event)
-{
-	QPointF mousePos = event->position();
 
-	// 计算鼠标位置相对于图像中心的偏移
-	QPointF relativePos = mousePos - (-imageOffset); // 以 (0, 0) 作为中心
-
-	// 更新缩放因子
-	float oldScaleFactor = scaleFactor;
-	if (event->angleDelta().y() > 0) {
-		scaleFactor *= 1.1f; // 放大
+// 更新视图平移
+void CammerWidget::translate(double dx, double dy) {
+	if (!scenePointer) {
+		qDebug() << "Scene initialized with pointer:" << scenePointer;
+		qWarning() << "scenePointer is null!";
+		return;
 	}
-	else {
-		scaleFactor /= 1.1f; // 缩小
+	qDebug() << "Scene initialized with pointer:" << scenePointer;
+	auto views = scenePointer->views();
+	if (views.isEmpty()) {
+		qDebug() << "Scene initialized with pointer:" << scenePointer;
+		qWarning() << "No views available!";
+		return;
 	}
 
-	// 更新偏移，保持鼠标位置不变
-	imageOffset = (relativePos * (scaleFactor / oldScaleFactor)) - relativePos + imageOffset;
+	QPointF currentPos = views.first()->mapToScene(views.first()->pos());
 
-	update(); // 更新小部件以触发重绘
+	// 检查 dx 和 dy 的值（示例：假设范围为 -100 到 100）
+	if (dx < -100 || dx > 100) {
+		qWarning() << "dx is out of range!";
+		return;
+	}
+	if (dy < -100 || dy > 100) {
+		qWarning() << "dy is out of range!";
+		return;
+	}
+
+	this->setGeometry(currentPos.x() + dx, currentPos.y() + dy, this->width(), this->height());
+	update(); // 刷新视图
 }
 
 // 状态栏统计信息 end 

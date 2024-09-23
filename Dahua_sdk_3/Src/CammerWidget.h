@@ -73,7 +73,6 @@ public:
 		trigSoftware = 1,	// 软件触发 | software trigger
 		trigLine = 2,		// 外部触发	| external trigger
 	};
-	void resolution(int width, int height);
 	// 打开相机
 	// open cmaera
 	bool CameraOpen(void);
@@ -115,7 +114,14 @@ public:
 	// 设置当前相机
 	// set current camera
 	void SetCamera(const QString& strKey);
-
+	//设置分辨率
+	void resolution(int width, int height);
+	//进行重绘
+	void setImage(const QImage& newImage);
+	void paintEvent(QPaintEvent* event);
+	//捕获鼠标事件
+	void mousePressEvent(QMouseEvent* event) override;
+	void wheelEvent(QWheelEvent* event) override;
 	// 状态栏统计信息
 	// Status bar statistics
 	void resetStatistic();
@@ -158,6 +164,12 @@ private:
 	Dahua::GenICam::IStreamSourcePtr pStreamSource;				// 流对象   |  stream object
 	Dahua::GenICam::IImageFormatControlPtr sptrFormatControl;		// 图像格式控制指针
 	Dahua::GenICam::IAcquisitionControlPtr acquisitionControl;		// 帧控制指针
+	QImage image; // 成员变量存储图像
+	QRectF targetRect; // 目标矩形
+	QRectF sourceRect; // 源矩形
+	float scaleFactor = 1.0f; // 当前缩放因子
+	QPointF imageOffset; //偏移量
+	bool imageSet;
 
 	Dahua::Infra::CThreadLite           thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				qDisplayFrameQueue;		// 显示队列      | diaplay queue
