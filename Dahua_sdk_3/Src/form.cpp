@@ -238,22 +238,14 @@ void Form::wheelEvent(QWheelEvent* event) {
 	QPointF mousePos = ui->widget->mapFromGlobal(event->globalPos()); // 获取鼠标在widget中的位置
 	double zoomFactorChange = (event->angleDelta().y() > 0) ? 1.1 : 1.0 / 1.1; // 根据滚轮方向决定放大或缩小
 	zoomFactor *= zoomFactorChange;
-
-	// 在这里进行缩放
-	// 获取绘图区域的矩形
-	QRectF boundingRect = ui->widget->rect();
-
-	// 计算缩放后的新尺寸
-	QSizeF newSize = boundingRect.size() * zoomFactorChange;
-
-	// 更新widget的大小（如果需要）
-	ui->widget->resize(newSize.toSize());
-
-	// 在paintEvent中使用zoomFactor来重新绘制内容
-	ui->widget->update(); // 触发重绘
+	if (event->angleDelta().y() > 0) {
+		ui->widget->zoomIn(); // 放大
+	}
+	else {
+		ui->widget->zoomOut(); // 缩小
+	}
 
 	event->accept();
 }
-
 
 
