@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>991</width>
-    <height>635</height>
+    <width>1080</width>
+    <height>661</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,17 +37,17 @@
   <widget class="CammerWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>60</y>
-     <width>541</width>
-     <height>411</height>
+     <width>648</width>
+     <height>512</height>
     </rect>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonOpen">
    <property name="geometry">
     <rect>
-     <x>640</x>
+     <x>720</x>
      <y>60</y>
      <width>75</width>
      <height>23</height>
@@ -72,7 +72,7 @@
   <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
     <rect>
-     <x>750</x>
+     <x>830</x>
      <y>60</y>
      <width>75</width>
      <height>23</height>
@@ -97,8 +97,8 @@
   <widget class="QPushButton" name="pushButtonStart">
    <property name="geometry">
     <rect>
-     <x>640</x>
-     <y>110</y>
+     <x>720</x>
+     <y>100</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -122,8 +122,8 @@
   <widget class="QPushButton" name="pushButtonStop">
    <property name="geometry">
     <rect>
-     <x>750</x>
-     <y>110</y>
+     <x>830</x>
+     <y>100</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -170,7 +170,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>550</y>
+     <y>590</y>
      <width>571</width>
      <height>16</height>
     </rect>
@@ -179,13 +179,13 @@
     <string>Statistics</string>
    </property>
   </widget>
-  <widget class="QSlider" name="horizontalSliderRote">
+  <widget class="QSlider" name="horizontalSliderRate">
    <property name="geometry">
     <rect>
-     <x>640</x>
-     <y>200</y>
-     <width>160</width>
-     <height>16</height>
+     <x>800</x>
+     <y>180</y>
+     <width>120</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="orientation">
@@ -195,10 +195,10 @@
   <widget class="QSlider" name="horizontalSliderGain">
    <property name="geometry">
     <rect>
-     <x>640</x>
-     <y>290</y>
-     <width>160</width>
-     <height>16</height>
+     <x>800</x>
+     <y>220</y>
+     <width>120</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="orientation">
@@ -208,9 +208,9 @@
   <widget class="QLineEdit" name="lineEditWidth">
    <property name="geometry">
     <rect>
-     <x>660</x>
-     <y>460</y>
-     <width>113</width>
+     <x>950</x>
+     <y>300</y>
+     <width>60</width>
      <height>20</height>
     </rect>
    </property>
@@ -218,18 +218,18 @@
   <widget class="QLineEdit" name="lineEditHeight">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>460</y>
-     <width>113</width>
+     <x>950</x>
+     <y>340</y>
+     <width>60</width>
      <height>20</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButtonResolution">
+  <widget class="QPushButton" name="pushButtonMaxResolution">
    <property name="geometry">
     <rect>
-     <x>760</x>
-     <y>510</y>
+     <x>940</x>
+     <y>140</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -247,15 +247,15 @@
     </size>
    </property>
    <property name="text">
-    <string>设置分辨率</string>
+    <string>最大分辨率</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEditRote">
+  <widget class="QLineEdit" name="lineEditRate">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>200</y>
-     <width>113</width>
+     <x>950</x>
+     <y>180</y>
+     <width>60</width>
      <height>20</height>
     </rect>
    </property>
@@ -263,9 +263,9 @@
   <widget class="QLineEdit" name="lineEditGain">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>290</y>
-     <width>113</width>
+     <x>950</x>
+     <y>220</y>
+     <width>60</width>
      <height>20</height>
     </rect>
    </property>
@@ -273,35 +273,35 @@
   <widget class="QLabel" name="labelRote">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>160</y>
-     <width>71</width>
-     <height>21</height>
+     <x>730</x>
+     <y>180</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>设置帧率</string>
+    <string>设置帧率：</string>
    </property>
   </widget>
   <widget class="QLabel" name="labelGain">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>250</y>
-     <width>71</width>
-     <height>21</height>
+     <x>730</x>
+     <y>220</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>设置增益</string>
+    <string>设置增益：</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditExposure">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>380</y>
-     <width>113</width>
+     <x>950</x>
+     <y>260</y>
+     <width>60</width>
      <height>20</height>
     </rect>
    </property>
@@ -312,23 +312,23 @@
   <widget class="QLabel" name="labelExposure">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>340</y>
-     <width>71</width>
-     <height>21</height>
+     <x>730</x>
+     <y>260</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>设置曝光</string>
+    <string>设置曝光：</string>
    </property>
   </widget>
   <widget class="QSlider" name="horizontalSliderExposure">
    <property name="geometry">
     <rect>
-     <x>640</x>
-     <y>380</y>
-     <width>160</width>
-     <height>16</height>
+     <x>800</x>
+     <y>260</y>
+     <width>120</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="orientation">
@@ -338,8 +338,8 @@
   <widget class="QPushButton" name="pushButtonOnestart">
    <property name="geometry">
     <rect>
-     <x>850</x>
-     <y>110</y>
+     <x>940</x>
+     <y>100</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -363,20 +363,20 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>700</x>
-     <y>430</y>
-     <width>211</width>
+     <x>730</x>
+     <y>300</y>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>宽度           *           高度</string>
+    <string>宽度：</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonReset">
    <property name="geometry">
     <rect>
-     <x>850</x>
+     <x>940</x>
      <y>60</y>
      <width>75</width>
      <height>23</height>
@@ -396,6 +396,167 @@
    </property>
    <property name="text">
     <string>重置</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonCropImage">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>140</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>框选裁剪</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>340</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>高度：</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSliderWidth">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>300</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSliderHeight">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>340</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditOffsetX">
+   <property name="geometry">
+    <rect>
+     <x>950</x>
+     <y>380</y>
+     <width>60</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>380</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>X偏移量：</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditOffsetY">
+   <property name="geometry">
+    <rect>
+     <x>950</x>
+     <y>420</y>
+     <width>60</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSliderOffsetX">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>380</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSliderOffsetY">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>420</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>420</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Y偏移量：</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonSave">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>140</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>75</width>
+     <height>23</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>保存图像</string>
    </property>
   </widget>
  </widget>

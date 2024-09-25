@@ -7,7 +7,6 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-
 /*#define DEFAULT_SHOW_RATE (60)*/ // 默认显示帧率 | defult display frequency
 #define DEFAULT_ERROR_STRING ("N/A") 
 #define MAX_FRAME_STAT_NUM (50) 
@@ -15,9 +14,12 @@
 #define MAX_STATISTIC_INTERVAL (5000000000) // List的更新时与最新一帧的时间最大间隔 |  The maximum time interval between the update of list and the latest frame
 
 int g_lShowRate = 30;
-int g_lWidth = 1920, g_lHeight = 1024;
+int g_lWidth = 1920, g_lHeight = 1024, g_lOffsetX = 0, g_lOffsetY = 0;
 int g_lAcquisition = 30;
 const float m_fMinScaleFactor = 0.2f;
+QPointF m_startPoint;
+QPointF m_endPoint;
+bool m_isCropping = false;
 
 using namespace Dahua::GenICam;
 using namespace Dahua::Infra;
@@ -487,6 +489,7 @@ void CammerWidget::SetCamera(const QString& strKey)
 	m_pCamera = systemObj.getCameraPtr(strKey.toStdString().c_str());
 	m_pSptrFormatControl = systemObj.createImageFormatControl(m_pCamera);
 	m_pAcquisitionControl = systemObj.createAcquisitionControl(m_pCamera);
+
 }
 
 // 显示
@@ -763,32 +766,96 @@ void CammerWidget::recvNewFrame(const CFrame& pBuf)
 // 更新帧率
 void CammerWidget::updateShowRate(double value)
 {
-	double maxFrameRate = 2000.0;
+	double l_iMaxFrameRate = 2000.0;
 	g_lAcquisition = value;
 	CDoubleNode frameRate = m_pAcquisitionControl->acquisitionFrameRate();
 	CBoolNode frameRateEnableNode = m_pAcquisitionControl->acquisitionFrameRateEnable();
-	if (g_lAcquisition < maxFrameRate) {
+	if (g_lAcquisition < l_iMaxFrameRate) {
 		frameRate.setValue(g_lAcquisition);
 	}
 	else {
-		frameRate.setValue(maxFrameRate);
+		frameRate.setValue(l_iMaxFrameRate);
 	}
 	frameRateEnableNode.setValue(true);
 }
 
-//设置分辨率
-void CammerWidget::resolution(int width, int height)
+//设置宽度
+void CammerWidget::setWidth(int width)
 {
+	CameraStop();
 	g_lWidth = width;
-	g_lHeight = height;
-	// 获取宽度和高度节点
 	CIntNode nodeWidth = m_pSptrFormatControl->width();
-	CIntNode nodeHeight = m_pSptrFormatControl->height();
-	nodeWidth.setValue(g_lWidth);
-	nodeHeight.setValue(g_lHeight);
+	int adjustedX = (g_lWidth + 15) / 16 * 16;
+	nodeWidth.setValue(adjustedX);
+	CameraStart();
 }
 
-//重绘
+//设置高度
+void CammerWidget::setHeight(int height)
+{
+	CameraStop();
+	g_lHeight = height;
+	CIntNode nodeWidth = m_pSptrFormatControl->height();
+	nodeWidth.setValue(g_lHeight);
+	CameraStart();
+}
+
+//设置X偏移量
+void CammerWidget::setOffsetX(int offsetX) {
+	CameraStop();
+	g_lOffsetX = offsetX;
+	CIntNode nodeOffsetX = m_pSptrFormatControl->offsetX();
+	int adjustedWidth = (g_lOffsetX + 15) / 16 * 16;
+	nodeOffsetX.setValue(adjustedWidth);
+	CameraStart();
+}
+
+//设置Y偏移量
+void CammerWidget::setOffsetY(int offsetY) {
+	CameraStop();
+	g_lOffsetY = offsetY;
+	CIntNode nodeOffsetY = m_pSptrFormatControl->offsetY();
+	nodeOffsetY.setValue(g_lOffsetY);
+	CameraStart();
+}
+
+//设置最大分辨率
+void CammerWidget::setMaxResolution() {
+	CameraStop();
+	CIntNode offsetX = m_pSptrFormatControl->offsetX();
+	CIntNode offsetY = m_pSptrFormatControl->offsetY();
+	CIntNode nodeWidth = m_pSptrFormatControl->width();
+	CIntNode nodeHeight = m_pSptrFormatControl->height();
+
+	offsetX.setValue(0);
+	offsetY.setValue(0);
+	nodeWidth.setValue(2592);
+	nodeHeight.setValue(2048);
+	CameraStart();
+}
+
+// 在 paintEvent 中绘制框选区域
+void CammerWidget::paintEvent(QPaintEvent* event) {
+	QPainter painter(this);
+
+	if (!m_aImage.isNull()) {
+		QSizeF scaledSize = m_aImage.size() * m_fScaleFactor;
+		QPointF topLeft = -m_pImageOffset;
+		QRectF drawRect(topLeft, scaledSize);
+
+		// 绘制图像
+		painter.drawImage(drawRect, m_aImage);
+
+		// 绘制裁剪选框
+		if (m_currentMode == Crop && m_isCropping) {
+			QRectF cropRect(m_startPoint, m_endPoint);
+			painter.setPen(Qt::red);
+			painter.drawRect(cropRect.normalized());
+		}
+	}
+}
+
+//重置
 void CammerWidget::setImage(const QImage& newImage)
 {
 	m_aImage = newImage;
@@ -806,64 +873,183 @@ void CammerWidget::setImage(const QImage& newImage)
 	update(); // 更新小部件以触发重绘
 }
 
-void CammerWidget::paintEvent(QPaintEvent* event)
-{
-	QPainter painter(this);
-	if (!m_aImage.isNull()) {
-		// 计算缩放后的图像大小
-		QSizeF scaledSize = m_aImage.size() * m_fScaleFactor;
-		QPointF topLeft = -m_pImageOffset;
-		QRectF drawRect(topLeft, scaledSize);
-		painter.drawImage(drawRect, m_aImage);
+// 捕获鼠标移动位置
+void CammerWidget::mouseMoveEvent(QMouseEvent* event) {
+	if (m_isCropping) {
+		m_endPoint = event->pos();
+		update(); // 更新以绘制框选区域
 	}
 }
 
+// 捕获鼠标释放位置
+void CammerWidget::mouseReleaseEvent(QMouseEvent* event) {
+	CameraStop();
+	if (m_currentMode == Crop && m_isCropping) {
+		m_endPoint = event->pos();
+		m_isCropping = false;
+
+		// 获取起点和终点坐标
+		int l_iStartX = m_startPoint.x();
+		int l_iStartY = m_startPoint.y();
+		int l_iEndX = m_endPoint.x();
+		int l_iEndY = m_endPoint.y();
+
+		// 计算裁剪区域
+		int l_iLeft = min(l_iStartX, l_iEndX);
+		int l_iTop = min(l_iStartY, l_iEndY);
+		int l_iRight = max(l_iStartX, l_iEndX);
+		int l_iBottom = max(l_iStartY, l_iEndY);
+
+		// 将框选区域转换到图像坐标系
+		QPointF topLeft = -(-m_pImageOffset);
+		int l_iScaledLeft = (l_iLeft - topLeft.x()) / m_fScaleFactor;
+		int l_iScaledTop = (l_iTop - topLeft.y()) / m_fScaleFactor;
+		int l_iScaledRight = (l_iRight - topLeft.x()) / m_fScaleFactor;
+		int l_iScaledBottom = (l_iBottom - topLeft.y()) / m_fScaleFactor;
+
+		// 创建裁剪矩形
+		QRect cropImageRect(l_iScaledLeft, l_iScaledTop, l_iScaledRight - l_iScaledLeft, l_iScaledBottom - l_iScaledTop);
+		cropImageRect = cropImageRect.intersected(QRect(0, 0, m_aImage.width(), m_aImage.height()));
+
+		CIntNode widthNode = m_pSptrFormatControl->width();
+		CIntNode heightNode = m_pSptrFormatControl->height();
+		CIntNode offsetX = m_pSptrFormatControl->offsetX();
+		CIntNode offsetY = m_pSptrFormatControl->offsetY();
+
+		g_lOffsetX = cropImageRect.x();
+		g_lOffsetY = cropImageRect.y();
+		g_lWidth = cropImageRect.width();
+		g_lHeight = cropImageRect.height();
+
+		// 步距
+		int l_iAdjustedX = (g_lOffsetX + 15) / 16 * 16;
+		int l_iAdjustedWidth = (g_lWidth + 15) / 16 * 16;
+
+		widthNode.setValue(l_iAdjustedWidth);
+		heightNode.setValue(g_lHeight);
+		offsetX.setValue(l_iAdjustedX);
+		offsetY.setValue(g_lOffsetY);
+
+		m_currentMode = Zoom;
+	}
+	CameraStart();
+}
+
 //捕获鼠标点击位置
-void CammerWidget::mousePressEvent(QMouseEvent* event)
-{
-	QPointF clickPos = event->pos();
-	QPointF relativePos = clickPos - (-m_pImageOffset); // 以 (0, 0) 作为中心
+void CammerWidget::mousePressEvent(QMouseEvent* event) {
+	if (m_currentMode == Zoom) {
+		// 缩放操作
+		QPointF clickPos = event->pos();
+		QPointF relativePos = clickPos - (-m_pImageOffset);
+		float oldScaleFactor = m_fScaleFactor;
+		m_fScaleFactor *= 1.1f;
 
-	float oldScaleFactor = m_fScaleFactor;
-	m_fScaleFactor *= 1.1f; // 放大1.1倍
+		// 确保 scaleFactor 不小于 minScaleFactor
+		if (m_fScaleFactor < m_fMinScaleFactor) {
+			m_fScaleFactor = m_fMinScaleFactor;
+		}
 
-	// 确保 scaleFactor 不小于 minScaleFactor
-	if (m_fScaleFactor < m_fMinScaleFactor) {
-		m_fScaleFactor = m_fMinScaleFactor;
+		m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
+		update();
 	}
 
-	m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
-
-	update(); // 更新小部件以触发重绘
+	if (m_currentMode == Crop && event->button() == Qt::LeftButton) {
+		m_startPoint = event->pos(); // 记录起始点
+		m_endPoint = m_startPoint; // 初始化结束点为起始点
+		m_isCropping = true; // 开始框选
+		update(); // 更新界面以显示框选
+	}
 }
 
 void CammerWidget::wheelEvent(QWheelEvent* event)
 {
-	QPointF mousePos = event->position();
-	QPointF relativePos = mousePos - (-m_pImageOffset); // 以 (0, 0) 作为中心
+	if (m_currentMode == Zoom) {
+		QPointF mousePos = event->position();
+		QPointF relativePos = mousePos - (-m_pImageOffset); // 以 (0, 0) 作为中心
 
-	float oldScaleFactor = m_fScaleFactor;
-	if (event->angleDelta().y() > 0) {
-		m_fScaleFactor *= 1.1f; // 放大
+		float oldScaleFactor = m_fScaleFactor;
+		if (event->angleDelta().y() > 0) {
+			m_fScaleFactor *= 1.1f; // 放大
+		}
+		else {
+			m_fScaleFactor /= 1.1f; // 缩小
+		}
+
+		// 确保 scaleFactor 不小于 minScaleFactor
+		if (m_fScaleFactor < m_fMinScaleFactor) {
+			m_fScaleFactor = m_fMinScaleFactor;
+		}
+
+		m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
+
+		update(); // 更新小部件以触发重绘
 	}
-	else {
-		m_fScaleFactor /= 1.1f; // 缩小
-	}
-
-	// 确保 scaleFactor 不小于 minScaleFactor
-	if (m_fScaleFactor < m_fMinScaleFactor) {
-		m_fScaleFactor = m_fMinScaleFactor;
-	}
-
-	m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
-
-	update(); // 更新小部件以触发重绘
 }
 
 void CammerWidget::resetImage()
 {
 	// 重置图像
-	setImage(m_aImage); // 假设 originalImage 是原始图像
+	setImage(m_aImage);
+	m_currentMode = Zoom;
+}
+
+//属性显示
+int CammerWidget::getHeight()
+{
+	CIntNode nodeHeight = m_pSptrFormatControl->height();
+	int64_t nCurVal = 0;
+	nodeHeight.getValue(nCurVal);
+	return nCurVal;
+}
+
+int CammerWidget::getWidth()
+{
+	CIntNode nodeWidth = m_pSptrFormatControl->width();
+	int64_t nCurVal = 0;
+	nodeWidth.getValue(nCurVal);
+	return nCurVal;
+}
+
+int CammerWidget::getOffsetX()
+{
+	CIntNode nodeOffsetX = m_pSptrFormatControl->offsetX();
+	int64_t nCurVal = 0;
+	nodeOffsetX.getValue(nCurVal);
+	return nCurVal;
+}
+
+int CammerWidget::getOffsetY()
+{
+	CIntNode nodeOffsetY = m_pSptrFormatControl->offsetY();
+	int64_t nCurVal = 0;
+	nodeOffsetY.getValue(nCurVal);
+	return nCurVal;
+}
+
+double CammerWidget::getShowRate() {
+	CDoubleNode frameRate = m_pAcquisitionControl->acquisitionFrameRate();
+	double nCurVal = 0;
+	frameRate.getValue(nCurVal);
+	return nCurVal;
+}
+
+double CammerWidget::getShowGain() {
+	CDoubleNode nodeGainRaw(m_pCamera, "GainRaw");
+	double nCurVal = 0;
+	nodeGainRaw.getValue(nCurVal);
+	return nCurVal;
+}
+
+double CammerWidget::getShowExposure() {
+	CDoubleNode nodeExposureTime(m_pCamera, "ExposureTime");
+	double nCurVal = 0;
+	nodeExposureTime.getValue(nCurVal);
+	return nCurVal;
+}
+
+//切换裁剪还是缩放
+void CammerWidget::setCurrentMode() {
+	m_currentMode = Crop;
 }
 
 // 状态栏统计信息 end 

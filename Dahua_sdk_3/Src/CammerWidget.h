@@ -8,7 +8,8 @@
 #include <QElapsedTimer>
 #include <QMutex>
 #include "GenICam/ParameterNode.h"
-#include <GenICam/AcquisitionControl.h>
+#include "GenICam/AcquisitionControl.h"
+#include "GenICam/ImageFormatControl.h"
 
 // 状态栏统计信息 
 // Status bar statistics
@@ -73,6 +74,7 @@ public:
 		trigSoftware = 1,	// 软件触发 | software trigger
 		trigLine = 2,		// 外部触发	| external trigger
 	};
+	enum Mode { Zoom, Crop };//切换模式
 	// 打开相机
 	// open cmaera
 	bool CameraOpen(void);
@@ -108,19 +110,38 @@ public:
 	bool SetAdjustPlus(double dGainRaw);
 	//更新帧率
 	void updateShowRate(double);
+	double getShowRate();
+	double getShowGain();
+	double getShowExposure();
 	// 设置当前相机
 	// set current camera
 	void SetCamera(const QString& strKey);
-	//设置分辨率
-	void resolution(int width, int height);
+	//设置宽度
+	void setWidth(int);
+	int getWidth();
+	//设置高度
+	void setHeight(int);
+	int getHeight();
+	//设置X偏移量
+	void setOffsetX(int);
+	int getOffsetX();
+	//设置Y偏移量
+	void setOffsetY(int);
+	int getOffsetY();
+	//设置最大分辨率
+	void setMaxResolution();
 	//进行重绘
 	void setImage(const QImage& newImage);
+	void mouseMoveEvent(QMouseEvent* event);
+	void mouseReleaseEvent(QMouseEvent* event);
 	void paintEvent(QPaintEvent* event);
 	//捕获鼠标事件
 	void mousePressEvent(QMouseEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
 	//重置图像
 	void resetImage();
+	//切换裁剪还是缩放
+	void setCurrentMode();
 	// 状态栏统计信息
 	// Status bar statistics
 	void resetStatistic();
@@ -168,6 +189,7 @@ private:
 	QPointF m_pImageOffset;											//偏移量
 	bool m_bImageSet;												//重置
 	float m_fZoomFactor;											//缩放因子
+	Mode m_currentMode = Zoom; // 默认模式为缩放
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue

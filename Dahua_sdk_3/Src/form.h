@@ -32,15 +32,35 @@ private slots:
 	void on_comboBox_currentIndexChanged(int nIndex);
 	void closeEvent(QCloseEvent* event);
 	void onTimerStreamStatistic();// 定时刷新状态栏信息 | Refresh status bar information regularly
-	void on_horizontalSliderRote_valueChanged(int value);
+	//设置帧率
+	void on_horizontalSliderRate_valueChanged(int value);
 	void on_horizontalSliderGain_valueChanged(int value);
-	void on_pushButtonResolution_clicked();
+	//设置增益
 	void on_lineEditRote_editingFinished();
 	void on_lineEditGain_editingFinished();
+	//设置曝光
 	void on_horizontalSliderExposure_valueChanged(int value);
 	void on_lineEditExposure_editingFinished();
+	//设置宽度
+	void on_horizontalSliderWidth_valueChanged(int value);
+	void on_lineEditWidth_editingFinished();
+	//设置高度
+	void on_horizontalSliderHeight_valueChanged(int value);
+	void on_lineEditHeight_editingFinished();
+	//设置x偏移量
+	void on_horizontalSliderOffsetX_valueChanged(int value);
+	void on_lineEditOffsetX_editingFinished();
+	//设置y偏移量
+	void on_horizontalSliderOffsetY_valueChanged(int value);
+	void on_lineEditOffsetY_editingFinished();
+	//最大分辨率
+	void on_pushButtonMaxResolution_clicked();
+
 	void on_pushButtonOnestart_clicked();
 	void on_pushButtonReset_clicked();
+	void on_pushButtonCropImage_clicked();
+
+	void showImage();
 
 private:
 	Ui::Form* ui;
