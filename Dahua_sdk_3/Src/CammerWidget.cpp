@@ -875,9 +875,9 @@ void CammerWidget::setImage(const QImage& newImage)
 
 // 捕获鼠标移动位置
 void CammerWidget::mouseMoveEvent(QMouseEvent* event) {
-	if (m_isCropping) {
+	if (m_currentMode == Crop && m_isCropping) {
 		m_endPoint = event->pos();
-		update(); // 更新以绘制框选区域
+		update();
 	}
 }
 
@@ -902,28 +902,34 @@ void CammerWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 		// 将框选区域转换到图像坐标系
 		QPointF topLeft = -(-m_pImageOffset);
-		int l_iScaledLeft = (l_iLeft - topLeft.x()) / m_fScaleFactor;
-		int l_iScaledTop = (l_iTop - topLeft.y()) / m_fScaleFactor;
-		int l_iScaledRight = (l_iRight - topLeft.x()) / m_fScaleFactor;
-		int l_iScaledBottom = (l_iBottom - topLeft.y()) / m_fScaleFactor;
+		int l_iScaledLeft = (l_iLeft - topLeft.x()) / m_fScaleFactor + g_lOffsetX;
+		int l_iScaledTop = (l_iTop - topLeft.y()) / m_fScaleFactor + g_lOffsetY;
+		int l_iScaledRight = (l_iRight - topLeft.x()) / m_fScaleFactor + g_lOffsetX;
+		int l_iScaledBottom = (l_iBottom - topLeft.y()) / m_fScaleFactor + g_lOffsetY;
 
 		// 创建裁剪矩形
-		QRect cropImageRect(l_iScaledLeft, l_iScaledTop, l_iScaledRight - l_iScaledLeft, l_iScaledBottom - l_iScaledTop);
-		cropImageRect = cropImageRect.intersected(QRect(0, 0, m_aImage.width(), m_aImage.height()));
+		QRect cropImageRect(l_iScaledLeft, l_iScaledTop,
+			l_iScaledRight - l_iScaledLeft,
+			l_iScaledBottom - l_iScaledTop);
 
-		CIntNode widthNode = m_pSptrFormatControl->width();
-		CIntNode heightNode = m_pSptrFormatControl->height();
-		CIntNode offsetX = m_pSptrFormatControl->offsetX();
-		CIntNode offsetY = m_pSptrFormatControl->offsetY();
+		// 确保裁剪区域在当前图像范围内
+		cropImageRect = cropImageRect.intersected(QRect(g_lOffsetX, g_lOffsetY, g_lWidth, g_lHeight));
 
+		// 更新全局变量
 		g_lOffsetX = cropImageRect.x();
 		g_lOffsetY = cropImageRect.y();
 		g_lWidth = cropImageRect.width();
 		g_lHeight = cropImageRect.height();
 
-		// 步距
+		// 步距调整
 		int l_iAdjustedX = (g_lOffsetX + 15) / 16 * 16;
 		int l_iAdjustedWidth = (g_lWidth + 15) / 16 * 16;
+
+		// 更新控制参数
+		CIntNode widthNode = m_pSptrFormatControl->width();
+		CIntNode heightNode = m_pSptrFormatControl->height();
+		CIntNode offsetX = m_pSptrFormatControl->offsetX();
+		CIntNode offsetY = m_pSptrFormatControl->offsetY();
 
 		widthNode.setValue(l_iAdjustedWidth);
 		heightNode.setValue(g_lHeight);
@@ -937,42 +943,29 @@ void CammerWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 //捕获鼠标点击位置
 void CammerWidget::mousePressEvent(QMouseEvent* event) {
-	if (m_currentMode == Zoom) {
-		// 缩放操作
-		QPointF clickPos = event->pos();
-		QPointF relativePos = clickPos - (-m_pImageOffset);
-		float oldScaleFactor = m_fScaleFactor;
-		m_fScaleFactor *= 1.1f;
-
-		// 确保 scaleFactor 不小于 minScaleFactor
-		if (m_fScaleFactor < m_fMinScaleFactor) {
-			m_fScaleFactor = m_fMinScaleFactor;
-		}
-
-		m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
-		update();
-	}
 
 	if (m_currentMode == Crop && event->button() == Qt::LeftButton) {
-		m_startPoint = event->pos(); // 记录起始点
-		m_endPoint = m_startPoint; // 初始化结束点为起始点
-		m_isCropping = true; // 开始框选
-		update(); // 更新界面以显示框选
+		m_startPoint = event->pos();
+		m_endPoint = m_startPoint;
+		m_isCropping = true;
+		update();
 	}
 }
 
-void CammerWidget::wheelEvent(QWheelEvent* event)
-{
+void CammerWidget::wheelEvent(QWheelEvent* event) {
 	if (m_currentMode == Zoom) {
-		QPointF mousePos = event->position();
-		QPointF relativePos = mousePos - (-m_pImageOffset); // 以 (0, 0) 作为中心
-
+		QPointF scrollPosition = event->position();
+		QPointF relativePos = scrollPosition - (-m_pImageOffset);
 		float oldScaleFactor = m_fScaleFactor;
+
+		// 根据滚轮方向确定缩放方向
 		if (event->angleDelta().y() > 0) {
-			m_fScaleFactor *= 1.1f; // 放大
+			// 向上滚动，放大
+			m_fScaleFactor *= 1.1f;
 		}
 		else {
-			m_fScaleFactor /= 1.1f; // 缩小
+			// 向下滚动，缩小
+			m_fScaleFactor /= 1.1f;
 		}
 
 		// 确保 scaleFactor 不小于 minScaleFactor
@@ -980,9 +973,11 @@ void CammerWidget::wheelEvent(QWheelEvent* event)
 			m_fScaleFactor = m_fMinScaleFactor;
 		}
 
+		// 计算新的偏移量，以保持鼠标位置不变
 		m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
 
-		update(); // 更新小部件以触发重绘
+		update(); // 更新界面以显示缩放效果
+		event->accept(); // 表示事件已被处理
 	}
 }
 

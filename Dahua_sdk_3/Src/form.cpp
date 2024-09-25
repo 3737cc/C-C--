@@ -308,6 +308,7 @@ void Form::on_lineEditOffsetY_editingFinished()
 void Form::on_pushButtonMaxResolution_clicked()
 {
 	ui->widget->setMaxResolution();
+	showImage();
 }
 
 //复位图像
@@ -326,7 +327,6 @@ void Form::on_pushButtonCropImage_clicked() {
 	ui->widget->setCurrentMode();
 	// 更新界面
 	ui->widget->update(); // 确保界面重绘
-	showImage();
 }
 
 void Form::showImage() {
