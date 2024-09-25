@@ -166,6 +166,11 @@ private:
 	void recvNewFrame(const CFrame& pBuf);
 	void updateStatistic();
 
+	//缩放比例和图像偏移
+	QRect calculateCropRect();
+	QRect applyCrop(const QRect& cropRect);
+	void centerImage();
+
 private slots:
 	// 显示一帧图像
 	// display a frame image 
@@ -185,10 +190,15 @@ private:
 	QImage m_aImage;												// 成员变量存储图像
 	QRectF m_aTargetRect;											// 目标矩形
 	QRectF m_aSourceRect;											// 源矩形
-	float m_fScaleFactor = 1.0f;									// 当前缩放因子
 	QPointF m_pImageOffset;											//偏移量
 	bool m_bImageSet;												//重置
-	float m_fZoomFactor;											//缩放因子
+	float m_fScaleFactor;											//缩放因子
+	float m_fMinScaleFactor;
+	QPoint m_startPoint;
+	QPoint m_endPoint;
+	bool m_isCropping;
+	QRect m_currentCropRect;
+	QRect cropRect;
 	Mode m_currentMode = Zoom; // 默认模式为缩放
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 

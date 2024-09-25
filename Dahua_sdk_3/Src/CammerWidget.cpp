@@ -33,7 +33,6 @@ CammerWidget::CammerWidget(QWidget* parent) :
 	, m_nLastFrameTime(0)
 	, m_bNeedUpdate(true)
 	, m_nTotalFrameCount(0),
-	m_fZoomFactor(1.0f),
 	m_bImageSet(false)
 {
 	ui->setupUi(this);
@@ -831,6 +830,7 @@ void CammerWidget::setMaxResolution() {
 	offsetY.setValue(0);
 	nodeWidth.setValue(2592);
 	nodeHeight.setValue(2048);
+
 	CameraStart();
 }
 
@@ -847,7 +847,7 @@ void CammerWidget::paintEvent(QPaintEvent* event) {
 		painter.drawImage(drawRect, m_aImage);
 
 		// 绘制裁剪选框
-		if (m_currentMode == Crop && m_isCropping) {
+		if (m_isCropping) {
 			QRectF cropRect(m_startPoint, m_endPoint);
 			painter.setPen(Qt::red);
 			painter.drawRect(cropRect.normalized());
@@ -875,7 +875,7 @@ void CammerWidget::setImage(const QImage& newImage)
 
 // 捕获鼠标移动位置
 void CammerWidget::mouseMoveEvent(QMouseEvent* event) {
-	if (m_currentMode == Crop && m_isCropping) {
+	if (m_isCropping) {
 		m_endPoint = event->pos();
 		update();
 	}
@@ -884,67 +884,19 @@ void CammerWidget::mouseMoveEvent(QMouseEvent* event) {
 // 捕获鼠标释放位置
 void CammerWidget::mouseReleaseEvent(QMouseEvent* event) {
 	CameraStop();
-	if (m_currentMode == Crop && m_isCropping) {
-		m_endPoint = event->pos();
-		m_isCropping = false;
+	m_endPoint = event->pos();
+	m_isCropping = false;
 
-		// 获取起点和终点坐标
-		int l_iStartX = m_startPoint.x();
-		int l_iStartY = m_startPoint.y();
-		int l_iEndX = m_endPoint.x();
-		int l_iEndY = m_endPoint.y();
+	QRect cropRect = calculateCropRect();
+	applyCrop(cropRect);
 
-		// 计算裁剪区域
-		int l_iLeft = min(l_iStartX, l_iEndX);
-		int l_iTop = min(l_iStartY, l_iEndY);
-		int l_iRight = max(l_iStartX, l_iEndX);
-		int l_iBottom = max(l_iStartY, l_iEndY);
-
-		// 将框选区域转换到图像坐标系
-		QPointF topLeft = -(-m_pImageOffset);
-		int l_iScaledLeft = (l_iLeft - topLeft.x()) / m_fScaleFactor + g_lOffsetX;
-		int l_iScaledTop = (l_iTop - topLeft.y()) / m_fScaleFactor + g_lOffsetY;
-		int l_iScaledRight = (l_iRight - topLeft.x()) / m_fScaleFactor + g_lOffsetX;
-		int l_iScaledBottom = (l_iBottom - topLeft.y()) / m_fScaleFactor + g_lOffsetY;
-
-		// 创建裁剪矩形
-		QRect cropImageRect(l_iScaledLeft, l_iScaledTop,
-			l_iScaledRight - l_iScaledLeft,
-			l_iScaledBottom - l_iScaledTop);
-
-		// 确保裁剪区域在当前图像范围内
-		cropImageRect = cropImageRect.intersected(QRect(g_lOffsetX, g_lOffsetY, g_lWidth, g_lHeight));
-
-		// 更新全局变量
-		g_lOffsetX = cropImageRect.x();
-		g_lOffsetY = cropImageRect.y();
-		g_lWidth = cropImageRect.width();
-		g_lHeight = cropImageRect.height();
-
-		// 步距调整
-		int l_iAdjustedX = (g_lOffsetX + 15) / 16 * 16;
-		int l_iAdjustedWidth = (g_lWidth + 15) / 16 * 16;
-
-		// 更新控制参数
-		CIntNode widthNode = m_pSptrFormatControl->width();
-		CIntNode heightNode = m_pSptrFormatControl->height();
-		CIntNode offsetX = m_pSptrFormatControl->offsetX();
-		CIntNode offsetY = m_pSptrFormatControl->offsetY();
-
-		widthNode.setValue(l_iAdjustedWidth);
-		heightNode.setValue(g_lHeight);
-		offsetX.setValue(l_iAdjustedX);
-		offsetY.setValue(g_lOffsetY);
-
-		m_currentMode = Zoom;
-	}
 	CameraStart();
 }
 
 //捕获鼠标点击位置
 void CammerWidget::mousePressEvent(QMouseEvent* event) {
 
-	if (m_currentMode == Crop && event->button() == Qt::LeftButton) {
+	if (event->button() == Qt::LeftButton) {
 		m_startPoint = event->pos();
 		m_endPoint = m_startPoint;
 		m_isCropping = true;
@@ -952,40 +904,95 @@ void CammerWidget::mousePressEvent(QMouseEvent* event) {
 	}
 }
 
+//使用鼠标滑轮进行缩放
 void CammerWidget::wheelEvent(QWheelEvent* event) {
-	if (m_currentMode == Zoom) {
-		QPointF scrollPosition = event->position();
-		QPointF relativePos = scrollPosition - (-m_pImageOffset);
-		float oldScaleFactor = m_fScaleFactor;
+	QPointF scrollPosition = event->position();
+	QPointF relativePos = scrollPosition - (-m_pImageOffset);
+	float oldScaleFactor = m_fScaleFactor;
 
-		// 根据滚轮方向确定缩放方向
-		if (event->angleDelta().y() > 0) {
-			// 向上滚动，放大
-			m_fScaleFactor *= 1.1f;
-		}
-		else {
-			// 向下滚动，缩小
-			m_fScaleFactor /= 1.1f;
-		}
-
-		// 确保 scaleFactor 不小于 minScaleFactor
-		if (m_fScaleFactor < m_fMinScaleFactor) {
-			m_fScaleFactor = m_fMinScaleFactor;
-		}
-
-		// 计算新的偏移量，以保持鼠标位置不变
-		m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
-
-		update(); // 更新界面以显示缩放效果
-		event->accept(); // 表示事件已被处理
+	if (event->angleDelta().y() > 0) {
+		m_fScaleFactor *= 1.1f;
 	}
+	else {
+		m_fScaleFactor /= 1.1f;
+	}
+
+	if (m_fScaleFactor < m_fMinScaleFactor) {
+		m_fScaleFactor = m_fMinScaleFactor;
+	}
+
+	m_pImageOffset = (relativePos * (m_fScaleFactor / oldScaleFactor)) - relativePos + m_pImageOffset;
+
+	update();
+	event->accept();
 }
+
+QRect CammerWidget::calculateCropRect() {
+	int l_iLeft = min(m_startPoint.x(), m_endPoint.x());
+	int l_iTop = min(m_startPoint.y(), m_endPoint.y());
+	int l_iRight = max(m_startPoint.x(), m_endPoint.x());
+	int l_iBottom = max(m_startPoint.y(), m_endPoint.y());
+
+	// 将框选区域转换到图像坐标系
+	QPointF topLeft = -m_pImageOffset;
+	int l_iScaledLeft = (l_iLeft - topLeft.x()) / m_fScaleFactor;
+	int l_iScaledTop = (l_iTop - topLeft.y()) / m_fScaleFactor;
+	int l_iScaledRight = (l_iRight - topLeft.x()) / m_fScaleFactor;
+	int l_iScaledBottom = (l_iBottom - topLeft.y()) / m_fScaleFactor;
+
+	// 创建裁剪矩形
+	QRect cropRect(l_iScaledLeft, l_iScaledTop,
+		l_iScaledRight - l_iScaledLeft,
+		l_iScaledBottom - l_iScaledTop);
+
+	// 确保裁剪区域在当前图像范围内
+	return cropRect.intersected(m_currentCropRect.isValid() ? m_currentCropRect : QRect(0, 0, m_aImage.width(), m_aImage.height()));
+}
+
+QRect CammerWidget::applyCrop(const QRect& cropRect) {
+	// 更新全局变量
+	g_lOffsetX += cropRect.x();
+	g_lOffsetY += cropRect.y();
+	g_lWidth = cropRect.width();
+	g_lHeight = cropRect.height();
+
+	// 步距调整
+	int l_iAdjustedX = (g_lOffsetX + 15) / 16 * 16;
+	int l_iAdjustedWidth = (g_lWidth + 15) / 16 * 16;
+
+	// 更新控制参数
+	m_pSptrFormatControl->width().setValue(l_iAdjustedWidth);
+	m_pSptrFormatControl->height().setValue(g_lHeight);
+	m_pSptrFormatControl->offsetX().setValue(l_iAdjustedX);
+	m_pSptrFormatControl->offsetY().setValue(g_lOffsetY);
+
+	// 更新当前裁剪矩形
+	m_currentCropRect = cropRect;
+
+	// 重置缩放和偏移
+	m_fScaleFactor = 1.0f;
+	m_pImageOffset = QPointF(0, 0);
+	update();
+	return m_currentCropRect;
+}
+
+void CammerWidget::centerImage() {
+	// 计算裁剪后的图像尺寸
+	QRectF croppedRect(g_lOffsetX, g_lOffsetY, g_lWidth, g_lHeight);
+
+	// 获取组件中心点
+	QPointF centerPoint = QRectF(0, 0, width(), height()).center();
+
+	// 计算新的偏移量，使图像居中
+	m_pImageOffset = centerPoint - QPointF(croppedRect.width() / 2, croppedRect.height() / 2);
+}
+
 
 void CammerWidget::resetImage()
 {
 	// 重置图像
 	setImage(m_aImage);
-	m_currentMode = Zoom;
+	//m_currentMode = Zoom;
 }
 
 //属性显示
@@ -1044,7 +1051,7 @@ double CammerWidget::getShowExposure() {
 
 //切换裁剪还是缩放
 void CammerWidget::setCurrentMode() {
-	m_currentMode = Crop;
+	/*m_currentMode = Crop;*/
 }
 
 // 状态栏统计信息 end 

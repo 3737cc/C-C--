@@ -323,10 +323,7 @@ void Form::on_pushButtonReset_clicked()
 
 //框选裁剪图像
 void Form::on_pushButtonCropImage_clicked() {
-	// 切换到裁剪模式
-	ui->widget->setCurrentMode();
-	// 更新界面
-	ui->widget->update(); // 确保界面重绘
+	showImage();
 }
 
 void Form::showImage() {
