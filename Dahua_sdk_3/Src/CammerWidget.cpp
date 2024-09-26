@@ -897,8 +897,7 @@ void CammerWidget::mouseReleaseEvent(QMouseEvent* event)
 		m_endPoint = event->pos();
 		QPoint diff = m_endPoint - m_startPoint;
 		int distance = diff.manhattanLength();
-		//以4个像素来判断是点击还是拖动
-		if (distance < 4) {
+		if (distance < 1) {
 			handleLeftClick(m_startPoint);
 		}
 		else {
@@ -906,9 +905,7 @@ void CammerWidget::mouseReleaseEvent(QMouseEvent* event)
 			QRect cropRect = calculateCropRect();
 			applyCrop(cropRect);
 			CameraStart();
-			QTimer::singleShot(50, this, [this]() {
-				setImage(m_aImage);
-				});
+			setImage(m_aImage);
 		}
 	}
 	update();
