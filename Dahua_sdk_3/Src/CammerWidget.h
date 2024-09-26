@@ -144,8 +144,7 @@ public:
 	void scaleImage(float scaleFactor, QPointF mousePos);
 	void handleLeftClick(const QPoint& pos);
 	void handleRightClick(const QPoint& pos);
-	//void startLongPressTimer(const QPoint& pos);
-	//void onLongPress();
+
 	//重置图像
 	void resetImage();
 	// 状态栏统计信息
@@ -206,13 +205,6 @@ private:
 	QPoint m_endPoint;												//鼠标结束坐标
 	bool m_isCropping;												//鼠标移动标志
 	QRect cropRect;													//裁剪框
-	QTimer m_croppingTimer;											//定时器
-	bool m_isScaling = false;
-	QPointF m_lastMousePos;
-
-	QTimer* m_longPressTimer;
-	QPoint m_lastClickPos;
-	bool m_isLongPress = false;
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue

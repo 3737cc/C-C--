@@ -41,11 +41,6 @@ CammerWidget::CammerWidget(QWidget* parent) :
 	qRegisterMetaType<uint64_t>("uint64_t");
 	connect(this, SIGNAL(signalShowImage(uint8_t*, int, int, uint64_t)), this, SLOT(ShowImage(uint8_t*, int, int, uint64_t)));
 
-	////初始化定时器
-	//m_longPressTimer = new QTimer(this);
-	//m_longPressTimer->setSingleShot(true);
-	//connect(m_longPressTimer, &QTimer::timeout, this, &CammerWidget::onLongPress);
-
 	setDisplayFPS(g_lShowRate);
 	m_elapsedTimer.start();
 
@@ -943,6 +938,7 @@ void CammerWidget::handleRightClick(const QPoint& pos)
 	scaleImage(1.0f / 1.1f, pos); // 缩小到原来的 1/1.1
 	update();
 }
+
 // paintEvent 函数以确保正确绘制
 void CammerWidget::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
