@@ -140,8 +140,6 @@ public:
 	void wheelEvent(QWheelEvent* event) override;
 	//重置图像
 	void resetImage();
-	//切换裁剪还是缩放
-	void setCurrentMode();
 	// 状态栏统计信息
 	// Status bar statistics
 	void resetStatistic();
@@ -170,6 +168,7 @@ private:
 	QRect calculateCropRect();
 	QRect applyCrop(const QRect& cropRect);
 	void centerImage();
+	void alignTopLeft();
 
 private slots:
 	// 显示一帧图像
@@ -193,13 +192,12 @@ private:
 	QPointF m_pImageOffset;											//偏移量
 	bool m_bImageSet;												//重置
 	float m_fScaleFactor;											//缩放因子
-	float m_fMinScaleFactor;
-	QPoint m_startPoint;
-	QPoint m_endPoint;
-	bool m_isCropping;
-	QRect m_currentCropRect;
-	QRect cropRect;
-	Mode m_currentMode = Zoom; // 默认模式为缩放
+	bool m_bJustResetResolution = true;								//重置缩放因子和偏移量
+	float m_fMinScaleFactor;										//最小缩放因子
+	QPoint m_startPoint;											//鼠标开始坐标
+	QPoint m_endPoint;												//鼠标结束坐标
+	bool m_isCropping;												//鼠标移动标志
+	QRect cropRect;													//裁剪框1
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue

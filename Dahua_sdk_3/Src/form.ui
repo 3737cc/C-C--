@@ -420,7 +420,7 @@
     </size>
    </property>
    <property name="text">
-    <string>框选裁剪</string>
+    <string>显示属性</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
