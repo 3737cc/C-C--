@@ -872,10 +872,9 @@ void CammerWidget::setImage(const QImage& newImage)
 // 捕获鼠标点击位置
 void CammerWidget::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton) {
-		m_startPoint = event->pos();
-	}
-	else if (event->button() == Qt::RightButton) {
+	m_isCropping = false;
+	m_startPoint = event->pos();
+	if (event->button() == Qt::RightButton) {
 		handleRightClick(event->pos());
 	}
 }
@@ -893,20 +892,18 @@ void CammerWidget::mouseMoveEvent(QMouseEvent* event)
 // 捕获鼠标释放位置
 void CammerWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton) {
+	if (m_isCropping == true) {
+		CameraStop();
+		QRect cropRect = calculateCropRect();
+		applyCrop(cropRect);
+		CameraStart();
+		setImage(m_aImage);
+	}
+	if (event->button() == Qt::LeftButton && m_isCropping == false) {
 		m_endPoint = event->pos();
 		QPoint diff = m_endPoint - m_startPoint;
 		int distance = diff.manhattanLength();
-		if (distance < 1) {
-			handleLeftClick(m_startPoint);
-		}
-		else {
-			CameraStop();
-			QRect cropRect = calculateCropRect();
-			applyCrop(cropRect);
-			CameraStart();
-			setImage(m_aImage);
-		}
+		handleLeftClick(m_startPoint);
 	}
 	update();
 }
