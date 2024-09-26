@@ -856,17 +856,21 @@ void CammerWidget::setImage(const QImage& newImage)
 {
 	m_aImage = newImage;
 
-	if (!m_aImage.isNull()) {
-		if (m_bJustResetResolution) {
-			// 使用适合窗口的缩放因子
-			float widthScale = width() / static_cast<float>(m_aImage.width());
-			float heightScale = height() / static_cast<float>(m_aImage.height());
-			m_fScaleFactor = qMin(widthScale, heightScale);
-			m_pImageOffset = QPointF(0, 0);
-			m_bJustResetResolution = false;  // 重置标志
-		}
-		// 否则，保持当前的缩放因子和偏移量
+	float imgAspectRatio = static_cast<float>(m_aImage.width()) / m_aImage.height();
+	float windowAspectRatio = static_cast<float>(width()) / height();
+
+	if (imgAspectRatio > windowAspectRatio) {
+		// 根据宽度缩放
+		m_fScaleFactor = width() / static_cast<float>(m_aImage.width());
 	}
+	else {
+		// 根据高度缩放
+		m_fScaleFactor = height() / static_cast<float>(m_aImage.height());
+	}
+
+	m_pImageOffset = QPointF((width() - m_aImage.width() * m_fScaleFactor) / 2,
+		(height() - m_aImage.height() * m_fScaleFactor) / 2);
+
 	update(); // 更新小部件以触发重绘
 }
 
