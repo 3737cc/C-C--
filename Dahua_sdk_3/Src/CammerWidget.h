@@ -10,6 +10,7 @@
 #include "GenICam/ParameterNode.h"
 #include "GenICam/AcquisitionControl.h"
 #include "GenICam/ImageFormatControl.h"
+#include <QTimer>
 
 // 状态栏统计信息 
 // Status bar statistics
@@ -132,12 +133,17 @@ public:
 	void setMaxResolution();
 	//进行重绘
 	void setImage(const QImage& newImage);
+	//鼠标事件
+	void mousePressEvent(QMouseEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event);
+	void onCroppingTimerTimeout();
 	void mouseReleaseEvent(QMouseEvent* event);
 	void paintEvent(QPaintEvent* event);
-	//捕获鼠标事件
-	void mousePressEvent(QMouseEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
+	//进行缩放
+	void scaleImage(float scaleFactor, QPointF mousePos);
+	void zoomIn(QPointF mousePos);
+	void zoomOut(QPointF mousePos);
 	//重置图像
 	void resetImage();
 	// 状态栏统计信息
@@ -197,7 +203,8 @@ private:
 	QPoint m_startPoint;											//鼠标开始坐标
 	QPoint m_endPoint;												//鼠标结束坐标
 	bool m_isCropping;												//鼠标移动标志
-	QRect cropRect;													//裁剪框1
+	QRect cropRect;													//裁剪框
+	QTimer m_croppingTimer;											//定时器
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue

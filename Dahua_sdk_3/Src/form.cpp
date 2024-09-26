@@ -1,6 +1,6 @@
 #include "form.h"
 #include "ui_form.h"
-#include "qdebug.h"
+#include "qdebug"
 
 Form::Form(QWidget* parent) :
 	QWidget(parent)
@@ -88,6 +88,7 @@ void Form::on_pushButtonOpen_clicked()
 	ui->comboBox->setEnabled(false);
 	ui->pushButtonReset->setEnabled(false);
 	ui->pushButtonMaxResolution->setEnabled(true);
+	ui->pushButtonShowProperties->setEnabled(true);
 
 	//显示相机内设参数
 	showImage();
@@ -113,6 +114,7 @@ void Form::on_pushButtonClose_clicked()
 	ui->comboBox->setEnabled(true);
 	ui->pushButtonReset->setEnabled(false);
 	ui->pushButtonMaxResolution->setEnabled(false);
+	ui->pushButtonShowProperties->setEnabled(false);
 }
 
 // 开始

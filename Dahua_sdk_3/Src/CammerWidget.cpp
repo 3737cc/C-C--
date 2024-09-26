@@ -905,31 +905,8 @@ void CammerWidget::alignTopLeft() {
 // 修改 wheelEvent 以根据鼠标位置缩放，同时保持左上角对齐
 void CammerWidget::wheelEvent(QWheelEvent* event) {
 	QPointF mousePos = event->position();
-	float oldScaleFactor = m_fScaleFactor;
-
-	if (event->angleDelta().y() > 0) {
-		m_fScaleFactor *= 1.1f;
-	}
-	else {
-		m_fScaleFactor /= 1.1f;
-	}
-
-	m_fScaleFactor = qMax(m_fScaleFactor, m_fMinScaleFactor);
-
-	// 计算鼠标位置相对于图像的比例
-	QPointF relativePos = (mousePos - m_pImageOffset) / oldScaleFactor;
-
-	// 计算新的偏移，以保持鼠标指向的图像点不变
-	QPointF newOffset = mousePos - relativePos * m_fScaleFactor;
-
-	// 调整偏移以保持左上角对齐，同时不超出图像边界
-	m_pImageOffset.setX(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.x()),
-		static_cast<double>(width() - m_aImage.width() * m_fScaleFactor))), 0.0));
-
-	m_pImageOffset.setY(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.y()),
-		static_cast<double>(height() - m_aImage.height() * m_fScaleFactor))), 0.0));
-
-	update();
+	float scaleFactor = (event->angleDelta().y() > 0) ? 1.1f : 1.0f / 1.1f;
+	scaleImage(scaleFactor, mousePos);
 	event->accept();
 }
 
@@ -951,6 +928,27 @@ void CammerWidget::paintEvent(QPaintEvent* event) {
 			painter.drawRect(cropRect);
 		}
 	}
+}
+
+void CammerWidget::scaleImage(float scaleFactor, QPointF mousePos) {
+	float oldScaleFactor = m_fScaleFactor;
+	m_fScaleFactor *= scaleFactor;
+	m_fScaleFactor = qMax(m_fScaleFactor, m_fMinScaleFactor);
+
+	// 计算鼠标位置相对于图像的比例
+	QPointF relativePos = (mousePos - m_pImageOffset) / oldScaleFactor;
+
+	// 计算新的偏移，以保持鼠标指向的图像点不变
+	QPointF newOffset = mousePos - relativePos * m_fScaleFactor;
+
+	// 调整偏移以保持左上角对齐，同时不超出图像边界
+	m_pImageOffset.setX(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.x()),
+		static_cast<double>(width() - m_aImage.width() * m_fScaleFactor))), 0.0));
+
+	m_pImageOffset.setY(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.y()),
+		static_cast<double>(height() - m_aImage.height() * m_fScaleFactor))), 0.0));
+
+	update();
 }
 
 // 更新 calculateCropRect 函数以考虑新的缩放和偏移
