@@ -144,8 +144,8 @@ public:
 	void scaleImage(float scaleFactor, QPointF mousePos);
 	void handleLeftClick(const QPoint& pos);
 	void handleRightClick(const QPoint& pos);
-	void startLongPressTimer(const QPoint& pos);
-	void onLongPress();
+	//void startLongPressTimer(const QPoint& pos);
+	//void onLongPress();
 	//重置图像
 	void resetImage();
 	// 状态栏统计信息

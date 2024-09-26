@@ -41,10 +41,10 @@ CammerWidget::CammerWidget(QWidget* parent) :
 	qRegisterMetaType<uint64_t>("uint64_t");
 	connect(this, SIGNAL(signalShowImage(uint8_t*, int, int, uint64_t)), this, SLOT(ShowImage(uint8_t*, int, int, uint64_t)));
 
-	//初始化定时器
-	m_longPressTimer = new QTimer(this);
-	m_longPressTimer->setSingleShot(true);
-	connect(m_longPressTimer, &QTimer::timeout, this, &CammerWidget::onLongPress);
+	////初始化定时器
+	//m_longPressTimer = new QTimer(this);
+	//m_longPressTimer->setSingleShot(true);
+	//connect(m_longPressTimer, &QTimer::timeout, this, &CammerWidget::onLongPress);
 
 	setDisplayFPS(g_lShowRate);
 	m_elapsedTimer.start();
@@ -878,8 +878,7 @@ void CammerWidget::setImage(const QImage& newImage)
 void CammerWidget::mousePressEvent(QMouseEvent* event)
 {
 	if (event->button() == Qt::LeftButton) {
-		m_lastClickPos = event->pos();
-		startLongPressTimer(event->pos());
+		m_startPoint = event->pos();
 	}
 	else if (event->button() == Qt::RightButton) {
 		handleRightClick(event->pos());
@@ -889,7 +888,8 @@ void CammerWidget::mousePressEvent(QMouseEvent* event)
 // 捕获鼠标移动位置
 void CammerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if (m_isLongPress) {
+	m_isCropping = true;
+	if (event->buttons() & Qt::LeftButton) {
 		m_endPoint = event->pos();
 		update();
 	}
@@ -898,22 +898,22 @@ void CammerWidget::mouseMoveEvent(QMouseEvent* event)
 // 捕获鼠标释放位置
 void CammerWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	m_longPressTimer->stop();
 	if (event->button() == Qt::LeftButton) {
-		if (!m_isLongPress) {
-			handleLeftClick(event->pos());
+		m_endPoint = event->pos();
+		QPoint diff = m_endPoint - m_startPoint;
+		int distance = diff.manhattanLength();
+		//以4个像素来判断是点击还是拖动
+		if (distance < 4) {
+			handleLeftClick(m_startPoint);
 		}
 		else {
-			m_isLongPress = false;
-			if (m_startPoint != m_endPoint) {
-				CameraStop();
-				QRect cropRect = calculateCropRect();
-				applyCrop(cropRect);
-				CameraStart();
-				QTimer::singleShot(50, this, [this]() {
-					setImage(m_aImage);
-					});
-			}
+			CameraStop();
+			QRect cropRect = calculateCropRect();
+			applyCrop(cropRect);
+			CameraStart();
+			QTimer::singleShot(50, this, [this]() {
+				setImage(m_aImage);
+				});
 		}
 	}
 	update();
@@ -931,6 +931,7 @@ void CammerWidget::wheelEvent(QWheelEvent* event) {
 // 处理左键单击（放大）
 void CammerWidget::handleLeftClick(const QPoint& pos)
 {
+	m_isCropping = false;
 	scaleImage(1.1f, pos); // 放大 1.1 倍
 	update();
 }
@@ -938,26 +939,10 @@ void CammerWidget::handleLeftClick(const QPoint& pos)
 // 处理右键单击（缩小）
 void CammerWidget::handleRightClick(const QPoint& pos)
 {
+	m_isCropping = false;
 	scaleImage(1.0f / 1.1f, pos); // 缩小到原来的 1/1.1
 	update();
 }
-
-// 开始长按定时器
-void CammerWidget::startLongPressTimer(const QPoint& pos)
-{
-	m_longPressTimer->start(100); // 100毫秒后触发长按
-	m_startPoint = pos;
-	m_endPoint = pos;
-}
-
-// 长按触发函数
-void CammerWidget::onLongPress()
-{
-	m_isLongPress = true;
-	m_isCropping = true;
-	update();
-}
-
 // paintEvent 函数以确保正确绘制
 void CammerWidget::paintEvent(QPaintEvent* event) {
 	QPainter painter(this);
