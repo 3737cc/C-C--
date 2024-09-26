@@ -865,41 +865,54 @@ void CammerWidget::setImage(const QImage& newImage)
 	update(); // 更新小部件以触发重绘
 }
 
-//捕获鼠标点击位置
+// 捕获鼠标点击位置
 void CammerWidget::mousePressEvent(QMouseEvent* event) {
 	if (event->button() == Qt::LeftButton) {
 		m_startPoint = event->pos();
 		m_endPoint = m_startPoint;
 		m_isCropping = true;
-		update();
+		m_lastMousePos = event->pos();
 	}
+	else if (event->button() == Qt::RightButton) {
+		m_lastMousePos = event->pos();
+		m_isScaling = true;
+	}
+	update();
 }
 
 // 捕获鼠标移动位置
 void CammerWidget::mouseMoveEvent(QMouseEvent* event) {
 	if (m_isCropping) {
 		m_endPoint = event->pos();
-		update();
 	}
+	else if (m_isScaling) {
+		QPointF delta = event->pos() - m_lastMousePos;
+		float scaleFactor = 1.0f + delta.y() * 0.01f; // 根据垂直移动来缩放
+		scaleImage(scaleFactor, m_lastMousePos);
+		m_lastMousePos = event->pos();
+	}
+	update();
 }
 
 // 捕获鼠标释放位置
 void CammerWidget::mouseReleaseEvent(QMouseEvent* event) {
-	CameraStop();
-	m_endPoint = event->pos();
-	m_isCropping = false;
-
-	QRect cropRect = calculateCropRect();
-	applyCrop(cropRect);
-
-	CameraStart();
-	QTimer::singleShot(50, this, [this]() {
-		setImage(m_aImage);
-		});
-}
-
-void CammerWidget::alignTopLeft() {
-	m_pImageOffset = QPointF(0, 0);
+	if (m_isCropping) {
+		m_endPoint = event->pos();
+		m_isCropping = false;
+		if (m_startPoint != m_endPoint) { // 只有当实际选择了一个区域时才进行裁剪
+			CameraStop();
+			QRect cropRect = calculateCropRect();
+			applyCrop(cropRect);
+			CameraStart();
+			QTimer::singleShot(50, this, [this]() {
+				setImage(m_aImage);
+				});
+		}
+	}
+	else if (m_isScaling) {
+		m_isScaling = false;
+	}
+	update();
 }
 
 // 修改 wheelEvent 以根据鼠标位置缩放，同时保持左上角对齐
@@ -908,6 +921,23 @@ void CammerWidget::wheelEvent(QWheelEvent* event) {
 	float scaleFactor = (event->angleDelta().y() > 0) ? 1.1f : 1.0f / 1.1f;
 	scaleImage(scaleFactor, mousePos);
 	event->accept();
+}
+
+// 缩放
+void CammerWidget::zoomIn(QMouseEvent* event) {
+	if (event->button() == Qt::LeftButton) {
+		QPointF mousePos = event->pos();
+		scaleImage(1.1f, mousePos); // 放大
+		update();
+	}
+}
+
+void CammerWidget::zoomOut(QMouseEvent* event) {
+	if (event->button() == Qt::LeftButton) {
+		QPointF mousePos = event->pos();
+		scaleImage(0.9f, mousePos); // 缩小
+		update();
+	}
 }
 
 // 更新 paintEvent 函数以确保正确绘制
@@ -971,6 +1001,10 @@ QRect CammerWidget::calculateCropRect() {
 		l_iScaledBottom - l_iScaledTop);
 
 	return cropRect.intersected(QRect(0, 0, m_aImage.width(), m_aImage.height()));
+}
+
+void CammerWidget::alignTopLeft() {
+	m_pImageOffset = QPointF(0, 0);
 }
 
 QRect CammerWidget::applyCrop(const QRect& cropRect) {

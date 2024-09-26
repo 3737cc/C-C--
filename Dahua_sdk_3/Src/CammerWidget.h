@@ -142,8 +142,8 @@ public:
 	void wheelEvent(QWheelEvent* event) override;
 	//进行缩放
 	void scaleImage(float scaleFactor, QPointF mousePos);
-	void zoomIn(QPointF mousePos);
-	void zoomOut(QPointF mousePos);
+	void zoomIn(QMouseEvent* event);
+	void zoomOut(QMouseEvent* event);
 	//重置图像
 	void resetImage();
 	// 状态栏统计信息
@@ -205,6 +205,8 @@ private:
 	bool m_isCropping;												//鼠标移动标志
 	QRect cropRect;													//裁剪框
 	QTimer m_croppingTimer;											//定时器
+	bool m_isScaling = false;
+	QPointF m_lastMousePos;
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
 	TMessageQue<CFrameInfo>				m_qDisplayFrameQueue;		// 显示队列      | diaplay queue
