@@ -59,6 +59,9 @@ void Form::initUi()
 	ui->pushButtonStop->setEnabled(false);
 	ui->pushButtonOnestart->setEnabled(false);
 	ui->pushButtonReset->setEnabled(false);
+	ui->pushButtonMaxResolution->setEnabled(false);
+	ui->pushButtonShowProperties->setEnabled(false);
+	ui->pushButtonSave->setEnabled(false);
 }
 
 // 设置要连接的相机
@@ -84,6 +87,7 @@ void Form::on_pushButtonOpen_clicked()
 	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(false);
 	ui->pushButtonReset->setEnabled(false);
+	ui->pushButtonMaxResolution->setEnabled(true);
 
 	//显示相机内设参数
 	showImage();
@@ -108,6 +112,7 @@ void Form::on_pushButtonClose_clicked()
 	ui->pushButtonStop->setEnabled(false);
 	ui->comboBox->setEnabled(true);
 	ui->pushButtonReset->setEnabled(false);
+	ui->pushButtonMaxResolution->setEnabled(false);
 }
 
 // 开始
@@ -308,6 +313,7 @@ void Form::on_lineEditOffsetY_editingFinished()
 void Form::on_pushButtonMaxResolution_clicked()
 {
 	ui->widget->setMaxResolution();
+	showImage();
 }
 
 //复位图像
@@ -320,8 +326,8 @@ void Form::on_pushButtonReset_clicked()
 	showImage();
 }
 
-//框选裁剪图像
-void Form::on_pushButtonCropImage_clicked() {
+//显示属性
+void Form::on_pushButtonShowProperties_clicked() {
 	showImage();
 }
 

@@ -398,7 +398,7 @@
     <string>重置</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButtonCropImage">
+  <widget class="QPushButton" name="pushButtonShowProperties">
    <property name="geometry">
     <rect>
      <x>720</x>

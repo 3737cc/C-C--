@@ -58,7 +58,7 @@ private slots:
 
 	void on_pushButtonOnestart_clicked();
 	void on_pushButtonReset_clicked();
-	void on_pushButtonCropImage_clicked();
+	void on_pushButtonShowProperties_clicked();
 
 	void showImage();
 
