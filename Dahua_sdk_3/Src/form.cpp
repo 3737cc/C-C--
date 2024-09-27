@@ -22,7 +22,7 @@ void Form::initUi()
 {
 	ui->horizontalSliderRate->setRange(0, 2000);
 	ui->horizontalSliderGain->setRange(0, 200);
-	ui->horizontalSliderExposure->setRange(0, 2000);
+	ui->horizontalSliderExposure->setRange(0, 10000);
 	ui->horizontalSliderWidth->setRange(0, 2592);
 	ui->horizontalSliderHeight->setRange(0, 2048);
 	ui->horizontalSliderOffsetX->setRange(0, 2592);

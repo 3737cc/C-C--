@@ -18,9 +18,6 @@ int g_lShowRate = 30;
 int g_lWidth = 1920, g_lHeight = 1024, g_lOffsetX = 0, g_lOffsetY = 0;
 int g_lAcquisition = 30;
 const float m_fMinScaleFactor = 0.2f;
-QPointF m_startPoint;
-QPointF m_endPoint;
-bool m_isCropping = false;
 
 using namespace Dahua::GenICam;
 using namespace Dahua::Infra;
@@ -883,6 +880,7 @@ void CammerWidget::mousePressEvent(QMouseEvent* event)
 void CammerWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	m_isCropping = true;
+	m_isPaintEvent = true;
 	if (event->buttons() & Qt::LeftButton) {
 		m_endPoint = event->pos();
 		update();
@@ -945,7 +943,7 @@ void CammerWidget::paintEvent(QPaintEvent* event) {
 		painter.drawImage(drawRect, m_aImage);
 
 		// 绘制裁剪选框
-		if (m_isCropping) {
+		if (m_isPaintEvent) {
 			QRectF cropRect = QRectF(m_startPoint, m_endPoint).normalized();
 			painter.setPen(Qt::red);
 			painter.drawRect(cropRect);
@@ -964,12 +962,26 @@ void CammerWidget::scaleImage(float scaleFactor, QPointF mousePos) {
 	// 计算新的偏移，以保持鼠标指向的图像点不变
 	QPointF newOffset = mousePos - relativePos * m_fScaleFactor;
 
-	// 调整偏移以保持左上角对齐，同时不超出图像边界
-	m_pImageOffset.setX(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.x()),
-		static_cast<double>(width() - m_aImage.width() * m_fScaleFactor))), 0.0));
+	// 直接更新偏移，不进行额外的对齐操作
+	m_pImageOffset = newOffset;
 
-	m_pImageOffset.setY(qMin(static_cast<double>(qMax(static_cast<double>(newOffset.y()),
-		static_cast<double>(height() - m_aImage.height() * m_fScaleFactor))), 0.0));
+	// 添加边界检查，防止图像完全移出视图，但保持相对位置
+	QSizeF scaledSize = m_aImage.size() * m_fScaleFactor;
+	QPointF maxOffset(width() - scaledSize.width(), height() - scaledSize.height());
+
+	if (scaledSize.width() > width()) {
+		m_pImageOffset.setX(qMin(qMax(m_pImageOffset.x(), maxOffset.x()), 0.0));
+	}
+	else {
+		m_pImageOffset.setX(qMax(qMin(m_pImageOffset.x(), maxOffset.x()), 0.0));
+	}
+
+	if (scaledSize.height() > height()) {
+		m_pImageOffset.setY(qMin(qMax(m_pImageOffset.y(), maxOffset.y()), 0.0));
+	}
+	else {
+		m_pImageOffset.setY(qMax(qMin(m_pImageOffset.y(), maxOffset.y()), 0.0));
+	}
 
 	update();
 }
@@ -1020,8 +1032,8 @@ QRect CammerWidget::applyCrop(const QRect& cropRect) {
 	// 重置缩放和偏移
 	m_fScaleFactor = 1.0f;
 	m_pImageOffset = QPointF(0, 0);
+	m_isPaintEvent = false;
 
-	m_isCropping = false;
 	update();
 	return cropRect;
 }

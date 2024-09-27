@@ -206,7 +206,8 @@ private:
 	float m_fMinScaleFactor;										//最小缩放因子
 	QPoint m_startPoint;											//鼠标开始坐标
 	QPoint m_endPoint;												//鼠标结束坐标
-	bool m_isCropping;												//鼠标移动标志
+	bool m_isCropping = false;											//鼠标移动标志
+	bool m_isPaintEvent = false;
 	QRect cropRect;													//裁剪框
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
