@@ -1,12 +1,5 @@
 #include "CammerWidget.h"
 #include "ui_cammerwidget.h"
-#include "GenICam/System.h"
-#include "GenICam/Camera.h"
-#include "GenICam/StreamSource.h"
-#include <qpainter>
-#include <QMouseEvent>
-#include <QWheelEvent>
-#include <QTimer.h>
 
 /*#define DEFAULT_SHOW_RATE (60)*/ // 默认显示帧率 | defult display frequency
 #define DEFAULT_ERROR_STRING ("N/A") 

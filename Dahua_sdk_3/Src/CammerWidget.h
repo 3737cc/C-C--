@@ -3,16 +3,21 @@
 
 #include <QWidget>
 #include "GenICam/System.h"
+#include "GenICam/Camera.h"
+#include "GenICam/StreamSource.h"
+#include "GenICam/ParameterNode.h"
+#include "GenICam/AcquisitionControl.h"
+#include "GenICam/ImageFormatControl.h"
 #include "Media/ImageConvert.h"
 #include "MessageQue.h"
 #include <QElapsedTimer>
 #include <QMutex>
-#include "GenICam/ParameterNode.h"
-#include "GenICam/AcquisitionControl.h"
-#include "GenICam/ImageFormatControl.h"
 #include <QTimer>
+#include <QPainter>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
-// 状态栏统计信息 
+//状态栏统计信息 
 // Status bar statistics
 struct FrameStatInfo
 {
