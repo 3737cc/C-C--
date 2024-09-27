@@ -1001,10 +1001,6 @@ QRect CammerWidget::calculateCropRect() {
 	return cropRect.intersected(QRect(0, 0, m_aImage.width(), m_aImage.height()));
 }
 
-void CammerWidget::alignTopLeft() {
-	m_pImageOffset = QPointF(0, 0);
-}
-
 QRect CammerWidget::applyCrop(const QRect& cropRect) {
 	g_lOffsetX += cropRect.x();
 	g_lOffsetY += cropRect.y();

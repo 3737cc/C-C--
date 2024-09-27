@@ -182,8 +182,6 @@ private:
 	//缩放比例和图像偏移
 	QRect calculateCropRect();
 	QRect applyCrop(const QRect& cropRect);
-	void centerImage();
-	void alignTopLeft();
 
 private slots:
 	// 显示一帧图像
@@ -211,8 +209,8 @@ private:
 	float m_fMinScaleFactor;										//最小缩放因子
 	QPoint m_startPoint;											//鼠标开始坐标
 	QPoint m_endPoint;												//鼠标结束坐标
-	bool m_isCropping = false;											//鼠标移动标志
-	bool m_isPaintEvent = false;
+	bool m_isCropping = false;										//鼠标移动标志
+	bool m_isPaintEvent = false;									//框选标志
 	QRect cropRect;													//裁剪框
 
 	Dahua::Infra::CThreadLite           m_thdDisplayThread;			// 显示线程      | diaplay thread 
