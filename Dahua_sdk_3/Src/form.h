@@ -63,6 +63,8 @@ private slots:
 	void on_pushButtonShowProperties_clicked();
 
 	void showImage();
+	//动态滑块
+	void dynamicSliders();
 
 private:
 	Ui::Form* ui;

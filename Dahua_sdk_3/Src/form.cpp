@@ -92,6 +92,7 @@ void Form::on_pushButtonOpen_clicked()
 
 	//显示相机内设参数
 	showImage();
+	dynamicSliders();
 	// 连接相机之后显示统计信息，所有值为0
 	// Show statistics after connecting camera, all values are 0
 	ui->widget->resetStatistic();
@@ -133,7 +134,7 @@ void Form::on_pushButtonStart_clicked()
 	ui->pushButtonSave->setEnabled(true);
 	ui->widget->resetStatistic();
 	m_mstaticTimer.start(100);
-
+	dynamicSliders();
 	showImage();
 }
 
@@ -146,6 +147,7 @@ void Form::on_pushButtonOnestart_clicked()
 	ui->pushButtonReset->setEnabled(true);
 	ui->widget->resetStatistic();
 	m_mstaticTimer.start(100);
+	dynamicSliders();
 }
 
 // 停止
@@ -238,6 +240,7 @@ void Form::on_horizontalSliderWidth_valueChanged(int value)
 {
 	ui->widget->setWidth(value);
 	ui->lineEditWidth->setText(QString::number(value));
+	dynamicSliders();
 }
 
 void Form::on_lineEditWidth_editingFinished()
@@ -251,6 +254,7 @@ void Form::on_lineEditWidth_editingFinished()
 		ui->horizontalSliderWidth->setValue(onExposure);
 		ui->widget->setWidth(onExposure);
 	}
+	dynamicSliders();
 }
 
 //设置高度
@@ -258,6 +262,7 @@ void Form::on_horizontalSliderHeight_valueChanged(int value)
 {
 	ui->widget->setHeight(value);
 	ui->lineEditHeight->setText(QString::number(value));
+	dynamicSliders();
 }
 
 void Form::on_lineEditHeight_editingFinished()
@@ -271,6 +276,7 @@ void Form::on_lineEditHeight_editingFinished()
 		ui->horizontalSliderHeight->setValue(onExposure);
 		ui->widget->setHeight(onExposure);
 	}
+	dynamicSliders();
 }
 
 //设置X偏移量
@@ -278,6 +284,7 @@ void Form::on_horizontalSliderOffsetX_valueChanged(int value)
 {
 	ui->widget->setOffsetX(value);
 	ui->lineEditOffsetX->setText(QString::number(value));
+	dynamicSliders();
 }
 
 void Form::on_lineEditOffsetX_editingFinished()
@@ -291,6 +298,7 @@ void Form::on_lineEditOffsetX_editingFinished()
 		ui->horizontalSliderOffsetX->setValue(onExposure);
 		ui->widget->setOffsetX(onExposure);
 	}
+	dynamicSliders();
 }
 
 //设置Y偏移量
@@ -298,6 +306,7 @@ void Form::on_horizontalSliderOffsetY_valueChanged(int value)
 {
 	ui->widget->setOffsetY(value);
 	ui->lineEditOffsetY->setText(QString::number(value));
+	dynamicSliders();
 }
 
 void Form::on_lineEditOffsetY_editingFinished()
@@ -311,6 +320,7 @@ void Form::on_lineEditOffsetY_editingFinished()
 		ui->horizontalSliderOffsetY->setValue(onExposure);
 		ui->widget->setOffsetY(onExposure);
 	}
+	dynamicSliders();
 }
 
 //最大分辨率
@@ -333,6 +343,7 @@ void Form::on_pushButtonReset_clicked()
 //显示属性
 void Form::on_pushButtonShowProperties_clicked() {
 	showImage();
+	dynamicSliders();
 }
 
 //保存当前帧图像
@@ -357,4 +368,20 @@ void Form::showImage() {
 	ui->horizontalSliderOffsetX->setValue(l_iOffsetX);
 	ui->horizontalSliderOffsetY->setValue(l_iOffsetY);
 
+}
+
+void Form::dynamicSliders() {
+	int64_t l_iWidth = ui->widget->getWidth();
+	int64_t l_iHeight = ui->widget->getHeight();
+	int64_t l_iOffsetX = ui->widget->getOffsetX();
+	int64_t l_iOffsetY = ui->widget->getOffsetY();
+	int64_t l_iMaxWidth = 2592 - l_iOffsetX;
+	int64_t l_iMaxHeight = 2048 - l_iOffsetY;
+	int64_t l_iMaxOffsetX = 2592 - l_iWidth;
+	int64_t l_iMaxOffsetY = 2048 - l_iHeight;
+
+	ui->horizontalSliderWidth->setRange(0, l_iMaxWidth);
+	ui->horizontalSliderHeight->setRange(0, l_iMaxHeight);
+	ui->horizontalSliderOffsetX->setRange(0, l_iMaxOffsetX);
+	ui->horizontalSliderOffsetY->setRange(0, l_iMaxOffsetY);
 }
