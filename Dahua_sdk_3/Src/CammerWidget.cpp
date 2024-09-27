@@ -825,22 +825,18 @@ void CammerWidget::setMaxResolution() {
 	m_fScaleFactor = 1.0f;
 	m_pImageOffset = QPointF(0, 0);
 	g_lOffsetX = 0;
-	g_lOffsetY = 0();
-
-	// 设置一个标志，表示我们刚刚重置了分辨率
-	m_bJustResetResolution = true;
+	g_lOffsetY = 0;
 
 	CameraStart();
-	QTimer::singleShot(50, this, [this]() {
-		setImage(m_aImage);
-		});
+	QImage l_aImage(2592, 2048, QImage::Format_Grayscale8);
+	setImage(l_aImage);
 }
 
 // 修改 setImage 函数以处理分辨率重置
 void CammerWidget::setImage(const QImage& newImage)
 {
 	m_aImage = newImage;
-
+	updateGeometry(); // 确保小部件尺寸是最新的
 	float imgAspectRatio = static_cast<float>(m_aImage.width()) / m_aImage.height();
 	float windowAspectRatio = static_cast<float>(width()) / height();
 
@@ -899,7 +895,7 @@ void CammerWidget::mouseReleaseEvent(QMouseEvent* event)
 	update();
 }
 
-// 修改 wheelEvent 以根据鼠标位置缩放，同时保持左上角对齐
+// 修改 wheelEvent 以根据鼠标位置缩放，居中
 void CammerWidget::wheelEvent(QWheelEvent* event) {
 	QPointF mousePos = event->position();
 	float scaleFactor = (event->angleDelta().y() > 0) ? 1.1f : 1.0f / 1.1f;

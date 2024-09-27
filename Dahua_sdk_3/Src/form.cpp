@@ -326,6 +326,10 @@ void Form::on_lineEditOffsetY_editingFinished()
 //最大分辨率
 void Form::on_pushButtonMaxResolution_clicked()
 {
+	ui->horizontalSliderWidth->setRange(0, 2592);
+	ui->horizontalSliderHeight->setRange(0, 2048);
+	ui->horizontalSliderOffsetX->setRange(0, 0);
+	ui->horizontalSliderOffsetY->setRange(0, 0);
 	ui->widget->setMaxResolution();
 	showImage();
 }
