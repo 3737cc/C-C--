@@ -1032,6 +1032,10 @@ void CammerWidget::resetImage()
 	setImage(m_aImage);
 }
 
+void CammerWidget::saveImage() {
+	m_aImage.save("output.bmp", "BMP");
+}
+
 //属性显示
 int CammerWidget::getHeight()
 {

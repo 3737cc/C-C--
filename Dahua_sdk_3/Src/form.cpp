@@ -130,6 +130,7 @@ void Form::on_pushButtonStart_clicked()
 	ui->pushButtonStop->setEnabled(true);
 	ui->pushButtonOnestart->setEnabled(false);
 	ui->pushButtonReset->setEnabled(true);
+	ui->pushButtonSave->setEnabled(true);
 	ui->widget->resetStatistic();
 	m_mstaticTimer.start(100);
 
@@ -157,6 +158,7 @@ void Form::on_pushButtonStop_clicked()
 	ui->pushButtonStop->setEnabled(false);
 	ui->pushButtonOnestart->setEnabled(true);
 	ui->pushButtonReset->setEnabled(false);
+	ui->pushButtonSave->setEnabled(false);
 }
 
 void Form::onTimerStreamStatistic()
@@ -331,6 +333,11 @@ void Form::on_pushButtonReset_clicked()
 //显示属性
 void Form::on_pushButtonShowProperties_clicked() {
 	showImage();
+}
+
+//保存当前帧图像
+void Form::on_pushButtonSave_clicked() {
+	ui->widget->saveImage();
 }
 
 void Form::showImage() {

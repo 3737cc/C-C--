@@ -55,6 +55,8 @@ private slots:
 	void on_lineEditOffsetY_editingFinished();
 	//最大分辨率
 	void on_pushButtonMaxResolution_clicked();
+	//保存
+	void on_pushButtonSave_clicked();
 
 	void on_pushButtonOnestart_clicked();
 	void on_pushButtonReset_clicked();

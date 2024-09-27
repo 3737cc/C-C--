@@ -152,6 +152,9 @@ public:
 	void resetStatistic();
 	QString getStatistic();
 
+	//保存图像
+	void saveImage();
+
 private:
 
 	// 显示线程
