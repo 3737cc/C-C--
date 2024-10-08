@@ -4,11 +4,17 @@ SharedMemory::SharedMemory(const QString& key) : sharedMemory(key) {}
 
 bool SharedMemory::Create(int size) {
 	if (sharedMemory.create(size)) {
-		return true;
+		memoryAddress = sharedMemory.data(); // 获取共享内存的地址
+		memorySize = sharedMemory.size();    // 获取共享内存的大小
+		isInitialized = true;                // 设置为已初始化
+		qDebug() << "Shared memory created successfully.";
+		qDebug() << "Memory address:" << reinterpret_cast<quintptr>(memoryAddress);
+		qDebug() << "Memory size:" << memorySize;
+		return true;                        // 创建成功
 	}
 	else {
 		qDebug() << "Unable to create shared memory:" << sharedMemory.errorString();
-		return false;
+		return false;                       // 创建失败
 	}
 }
 
@@ -16,6 +22,12 @@ void SharedMemory::Detach() {
 	sharedMemory.detach();
 }
 
+bool SharedMemory::Attach() {
+	if (sharedMemory.attach()) {
+		return true;
+	}
+	return false;
+}
 
 QString SharedMemory::Read() {
 	if (!sharedMemory.isAttached()) {
@@ -59,4 +71,16 @@ bool SharedMemory::Write(const QString& data) {
 	}
 
 	return true;
+}
+
+void* SharedMemory::getAddress() {
+	return isInitialized ? memoryAddress : nullptr; // 返回地址或空指针
+}
+
+size_t SharedMemory::getSize() {
+	return isInitialized ? memorySize : 0; // 返回大小或0
+}
+
+QString SharedMemory::getStatus() {
+	return isInitialized ? "Initialized" : "Not Initialized"; // 返回状态
 }

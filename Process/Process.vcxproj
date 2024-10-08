@@ -92,14 +92,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ProcessB.cpp" />
     <ClCompile Include="SharedMemory.cpp" />
     <QtRcc Include="Process.qrc" />
     <QtUic Include="Process.ui" />
     <QtMoc Include="Process.h" />
     <ClCompile Include="Process.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="ProcessB.ui" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ProcessB.h" />
     <ClInclude Include="SharedMemory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -26,7 +26,7 @@
      <widget class="QLineEdit" name="addressInput"/>
     </item>
     <item>
-     <widget class="QLabel" name="valueLabel">
+     <widget class="QLabel" name="valueInputLabel">
       <property name="text">
        <string>传输的值：</string>
       </property>
@@ -36,16 +36,26 @@
      <widget class="QLineEdit" name="valueInput"/>
     </item>
     <item>
-     <widget class="QPushButton" name="readButton">
+     <widget class="QLabel" name="valueOutputLabel">
       <property name="text">
-       <string>读取</string>
+       <string>读取的值：</string>
       </property>
      </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="valueOutput"/>
     </item>
     <item>
      <widget class="QPushButton" name="writeButton">
       <property name="text">
        <string>写入</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="readButton">
+      <property name="text">
+       <string>读取</string>
       </property>
      </widget>
     </item>
