@@ -3,6 +3,13 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_Process.h"
 #include "SharedMemory.h"
+#include <QMainWindow>
+#include <QTimer>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QDebug>
+#include <QSharedMemory>
+#include <windows.h>
 
 class Process : public QMainWindow
 {
@@ -10,13 +17,19 @@ class Process : public QMainWindow
 
 public:
 	Process(QWidget* parent = nullptr);
-	~Process();
 
 private slots:
+	void onSizeButtonClicked();
 	void onReadButtonClicked();
 	void onWriteButtonClicked();
+	void updateMemoryUsage();
+
+private:
+	double getMemoryUsage();
 
 private:
 	Ui::Process ui;
-	SharedMemory sharedMemory;// 共享内存对象
+	SharedMemory m_sharedMemory;// 共享内存对象
+	QProgressBar* memoryUsageBar;
+	QTimer* m_timer;          // 定时器对象
 };

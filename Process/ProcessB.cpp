@@ -2,7 +2,7 @@
 
 ProcessB::ProcessB(QWidget* parent)
 	: QMainWindow(parent)
-	, sharedMemory("MySharedMemoryKey") // 初始化共享内存，使用相同的键
+	, m_sharedMemory("MySharedMemoryKey") // 初始化共享内存，使用相同的键
 {
 	ui.setupUi(this);
 
@@ -10,7 +10,7 @@ ProcessB::ProcessB(QWidget* parent)
 	QObject::connect(ui.writeButton, &QPushButton::clicked, this, &ProcessB::onWriteButtonClicked);
 
 	// 连接共享内存
-	if (!sharedMemory.Attach()) {
+	if (!m_sharedMemory.Attach()) {
 		qDebug() << "Unable to connect to shared memory.";
 	}
 }
@@ -21,7 +21,7 @@ ProcessB::~ProcessB()
 }
 
 void ProcessB::onReadButtonClicked() {
-	QString data = sharedMemory.Read(); // 从共享内存读取数据
+	QString data = m_sharedMemory.Read(); // 从共享内存读取数据
 	if (!data.isEmpty()) {
 		qDebug() << "B:Data read from shared memory:" << data;
 		ui.addressInput->setText(data);
@@ -33,7 +33,7 @@ void ProcessB::onReadButtonClicked() {
 
 void ProcessB::onWriteButtonClicked() {
 	QString dataToWrite = ui.valueInput->text();
-	if (sharedMemory.Write(dataToWrite)) {
+	if (m_sharedMemory.Write(dataToWrite)) {
 		qDebug() << "B:Data written to shared memory:" << dataToWrite;
 	}
 	else {

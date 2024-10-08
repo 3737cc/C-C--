@@ -17,5 +17,5 @@ public:
 
 private:
 	Ui::ProcessBClass ui;
-	SharedMemory sharedMemory;// 共享内存对象
+	SharedMemory m_sharedMemory;// 共享内存对象
 };

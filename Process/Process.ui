@@ -16,14 +16,25 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="addressLabel">
-      <property name="text">
-       <string>内存地址：</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="addressInput"/>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="sizeLabel">
+        <property name="text">
+         <string>内存大小：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sizeInput"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="sizeButton">
+        <property name="text">
+         <string>设置内存大小</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QLabel" name="valueInputLabel">
@@ -46,18 +57,22 @@
      <widget class="QLineEdit" name="valueOutput"/>
     </item>
     <item>
-     <widget class="QPushButton" name="writeButton">
-      <property name="text">
-       <string>写入</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="readButton">
-      <property name="text">
-       <string>读取</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="writeButton">
+        <property name="text">
+         <string>写入</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="readButton">
+        <property name="text">
+         <string>读取</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QTableWidget" name="memoryBlockTable">
@@ -82,11 +97,22 @@
      <widget class="QTextEdit" name="logTextEdit"/>
     </item>
     <item>
-     <widget class="QProgressBar" name="memoryUsageBar">
-      <property name="value">
-       <number>24</number>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="memoryUsageLabel">
+        <property name="text">
+         <string>内存使用率：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="memoryUsageBar">
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
