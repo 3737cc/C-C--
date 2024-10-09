@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Process</class>
- <widget class="QMainWindow" name="Process">
+ <class>SemaphoreClass</class>
+ <widget class="QMainWindow" name="SemaphoreClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>571</width>
-    <height>522</height>
+    <width>493</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Process</string>
+   <string>Semaphore</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-    </item>
     <item>
      <widget class="QLabel" name="valueInputLabel">
       <property name="text">
@@ -60,22 +57,17 @@
      <widget class="QTableWidget" name="memoryBlockTable">
       <column>
        <property name="text">
-        <string>地址</string>
+        <string>队列大小</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>大小</string>
+        <string>数据大小</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>状态</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>数据字节</string>
+        <string>数据数量</string>
        </property>
       </column>
       <column>
@@ -85,33 +77,10 @@
       </column>
      </widget>
     </item>
-    <item>
-     <widget class="QTextEdit" name="logTextEdit"/>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QLabel" name="memoryUsageLabel">
-        <property name="text">
-         <string>内存使用率：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="memoryUsageBar">
-        <property name="value">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="Process.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

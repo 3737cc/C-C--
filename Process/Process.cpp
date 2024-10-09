@@ -6,7 +6,7 @@ Process::Process(QWidget* parent)
 {
 	ui.setupUi(this);
 
-	QObject::connect(ui.sizeButton, &QPushButton::clicked, this, &Process::onSizeButtonClicked);
+	//QObject::connect(ui.sizeButton, &QPushButton::clicked, this, &Process::onSizeButtonClicked);
 	QObject::connect(ui.readButton, &QPushButton::clicked, this, &Process::onReadButtonClicked);
 	QObject::connect(ui.writeButton, &QPushButton::clicked, this, &Process::onWriteButtonClicked);
 
@@ -24,11 +24,11 @@ Process::Process(QWidget* parent)
 	m_timer->start(1000); // 每秒更新内存使用情况
 }
 
-void Process::onSizeButtonClicked() {
-	QString l_szSize = ui.sizeInput->text();
-	int l_lSize = l_szSize.toInt();
-	m_sharedMemory.Resize(l_lSize);
-}
+//void Process::onSizeButtonClicked() {
+//	QString l_szSize = ui.sizeInput->text();
+//	int l_lSize = l_szSize.toInt();
+//	m_sharedMemory.Resize(l_lSize);
+//}
 
 void Process::onReadButtonClicked() {
 	QString data = m_sharedMemory.Read(); // 从共享内存读取数据

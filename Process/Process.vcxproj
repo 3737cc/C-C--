@@ -92,17 +92,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MessageQueues.cpp" />
     <ClCompile Include="ProcessB.cpp" />
+    <ClCompile Include="Semaphore.cpp" />
     <ClCompile Include="SharedMemory.cpp" />
     <QtRcc Include="Process.qrc" />
+    <QtUic Include="MessageQueues.ui" />
     <QtUic Include="Process.ui" />
     <QtMoc Include="Process.h" />
     <ClCompile Include="Process.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="ProcessB.ui" />
+    <QtUic Include="Semaphore.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ProcessB.h" />
+    <QtMoc Include="Semaphore.h" />
+    <QtMoc Include="MessageQueues.h" />
     <ClInclude Include="SharedMemory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -19,7 +19,7 @@ public:
 	Process(QWidget* parent = nullptr);
 
 private slots:
-	void onSizeButtonClicked();
+	//void onSizeButtonClicked();
 	void onReadButtonClicked();
 	void onWriteButtonClicked();
 	void updateMemoryUsage();

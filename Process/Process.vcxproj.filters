@@ -46,6 +46,12 @@
     <ClCompile Include="ProcessB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Semaphore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageQueues.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SharedMemory.h">
@@ -56,9 +62,21 @@
     <QtMoc Include="ProcessB.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Semaphore.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MessageQueues.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ProcessB.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Semaphore.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MessageQueues.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
