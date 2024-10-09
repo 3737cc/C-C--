@@ -6,14 +6,79 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>499</width>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MessageQueues</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="valueInputLabel">
+      <property name="text">
+       <string>传输的值：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="valueInput"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueOutputLabel">
+      <property name="text">
+       <string>读取的值：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="valueOutput"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="writeButton">
+        <property name="text">
+         <string>写入</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="readButton">
+        <property name="text">
+         <string>读取</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="memoryBlockTable">
+      <column>
+       <property name="text">
+        <string>队列大小</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据大小</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据数量</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>运行时间</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

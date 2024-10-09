@@ -92,10 +92,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MessageQueues.cpp" />
+    <ClCompile Include="Message.cpp" />
+    <ClCompile Include="MessageQueues.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="ProcessB.cpp" />
     <ClCompile Include="Semaphore.cpp" />
     <ClCompile Include="SharedMemory.cpp" />
+    <ClCompile Include="Signal.cpp" />
     <QtRcc Include="Process.qrc" />
     <QtUic Include="MessageQueues.ui" />
     <QtUic Include="Process.ui" />
@@ -106,9 +113,11 @@
     <QtUic Include="Semaphore.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="Semaphore.h" />
     <QtMoc Include="MessageQueues.h" />
+    <ClInclude Include="Message.h" />
     <ClInclude Include="SharedMemory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
