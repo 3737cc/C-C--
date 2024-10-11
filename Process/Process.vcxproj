@@ -60,9 +60,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>E:\C++_Test\Communication\boost_1_86_0;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\C++_Test\Communication\boost_1_86_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalLibraryDirectories>E:\C++_Test\Communication\boost_1_86_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\C++_Test\Communication\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -99,12 +109,14 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
+    <ClCompile Include="MessageQueuesB.cpp" />
     <ClCompile Include="ProcessB.cpp" />
     <ClCompile Include="Semaphore.cpp" />
     <ClCompile Include="SharedMemory.cpp" />
     <ClCompile Include="Signal.cpp" />
     <QtRcc Include="Process.qrc" />
     <QtUic Include="MessageQueues.ui" />
+    <QtUic Include="MessageQueuesB.ui" />
     <QtUic Include="Process.ui" />
     <QtMoc Include="Process.h" />
     <ClCompile Include="Process.cpp" />
@@ -113,6 +125,7 @@
     <QtUic Include="Semaphore.ui" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MessageQueuesB.h" />
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="Semaphore.h" />

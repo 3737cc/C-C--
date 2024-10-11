@@ -58,6 +58,9 @@
     <ClCompile Include="MessageQueues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MessageQueuesB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SharedMemory.h">
@@ -80,6 +83,9 @@
     <QtMoc Include="MessageQueues.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="MessageQueuesB.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ProcessB.ui">
@@ -89,6 +95,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="MessageQueues.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MessageQueuesB.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

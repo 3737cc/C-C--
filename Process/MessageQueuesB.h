@@ -1,24 +1,24 @@
 // messagequeues.h
 #pragma once
 
-#include "ui_messagequeues.h"
+#include "ui_messagequeuesB.h"
 #include <QMainWindow>
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 using namespace boost::interprocess;
 
-class MessageQueues : public QMainWindow
+class MessageQueuesB : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MessageQueues(QWidget* parent = nullptr);
-	~MessageQueues();
+	MessageQueuesB(QWidget* parent = nullptr);
+	~MessageQueuesB();
 
 private slots:
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
 
 private:
-	Ui::MessageQueuesClass ui;
+	Ui::MessageQueuesBClass ui;
 	message_queue* m_mq;
 };

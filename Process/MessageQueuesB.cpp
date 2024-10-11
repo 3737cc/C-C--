@@ -1,17 +1,17 @@
 // messagequeues.cpp
-#include "messagequeues.h"
+#include "messagequeuesB.h"
 #include <QMessageBox>
 
-MessageQueues::MessageQueues(QWidget* parent)
+MessageQueuesB::MessageQueuesB(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
 
-	// 尝试创建消息队列，仅在第一次创建时执行
+	// 尝试创建或打开消息队列
 	if (!m_mq) {
 		try {
 			// 创建新的消息队列
-			m_mq = new message_queue(create_only, "message_queue", 100, sizeof(char) * 256);
+			m_mq = new message_queue(open_or_create, "message_queue", 100, sizeof(char) * 256);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",
@@ -20,18 +20,18 @@ MessageQueues::MessageQueues(QWidget* parent)
 		}
 	}
 
-	connect(ui.writeButton, &QPushButton::clicked, this, &MessageQueues::onWriteButtonClicked);
-	connect(ui.readButton, &QPushButton::clicked, this, &MessageQueues::onReadButtonClicked);
+	connect(ui.writeButton, &QPushButton::clicked, this, &MessageQueuesB::onWriteButtonClicked);
+	connect(ui.readButton, &QPushButton::clicked, this, &MessageQueuesB::onReadButtonClicked);
 }
 
-MessageQueues::~MessageQueues() {
+MessageQueuesB::~MessageQueuesB() {
 	if (m_mq) {
 		message_queue::remove("message_queue");
 		delete m_mq;
 	}
 }
 
-void MessageQueues::onWriteButtonClicked()
+void MessageQueuesB::onWriteButtonClicked()
 {
 	if (!m_mq) {
 		QMessageBox::critical(this, "Error", "Message queue is not initialized!");
@@ -60,14 +60,14 @@ void MessageQueues::onWriteButtonClicked()
 	}
 }
 
-void MessageQueues::onReadButtonClicked()
+void MessageQueuesB::onReadButtonClicked()
 {
 	if (!m_mq) {
 		QMessageBox::critical(this, "Error", "Message queue is not initialized!");
 		return;
 	}
 
-	char buffer[256] = {};;
+	char buffer[256] = {};
 	size_t received_size = 0;
 	unsigned int priority;
 
