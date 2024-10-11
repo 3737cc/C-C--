@@ -4,6 +4,8 @@
 #include "ui_messagequeues.h"
 #include <QMainWindow>
 #include <boost/interprocess/ipc/message_queue.hpp>
+#include <iostream>
+#include <Windows.h>
 
 using namespace boost::interprocess;
 
@@ -21,4 +23,6 @@ private slots:
 private:
 	Ui::MessageQueuesClass ui;
 	message_queue* m_mq;
+	LARGE_INTEGER frequency; // 计时器频率
+	LARGE_INTEGER start, end; // 计时器值
 };

@@ -110,6 +110,8 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="MessageQueuesB.cpp" />
+    <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="PipeB.cpp" />
     <ClCompile Include="ProcessB.cpp" />
     <ClCompile Include="Semaphore.cpp" />
     <ClCompile Include="SharedMemory.cpp" />
@@ -117,6 +119,8 @@
     <QtRcc Include="Process.qrc" />
     <QtUic Include="MessageQueues.ui" />
     <QtUic Include="MessageQueuesB.ui" />
+    <QtUic Include="Pipe.ui" />
+    <QtUic Include="PipeB.ui" />
     <QtUic Include="Process.ui" />
     <QtMoc Include="Process.h" />
     <ClCompile Include="Process.cpp" />
@@ -126,6 +130,8 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MessageQueuesB.h" />
+    <QtMoc Include="Pipe.h" />
+    <QtMoc Include="PipeB.h" />
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="Semaphore.h" />

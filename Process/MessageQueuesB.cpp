@@ -11,7 +11,7 @@ MessageQueuesB::MessageQueuesB(QWidget* parent)
 	if (!m_mq) {
 		try {
 			// 创建新的消息队列
-			m_mq = new message_queue(open_or_create, "message_queue", 100, sizeof(char) * 256);
+			m_mq = new message_queue(open_or_create, "message_queue", 100000, sizeof(char) * 256);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",

@@ -36,7 +36,6 @@ void Process::onReadButtonClicked() {
 		qDebug() << "A:Data read from shared memory:" << data;
 		ui.valueOutput->setText(data);
 
-		// 假设你的共享内存类有方法获取地址、大小和状态
 		void* address = m_sharedMemory.getAddress(); // 获取共享内存地址
 		size_t size = m_sharedMemory.getSize();      // 获取共享内存大小
 		QString status = m_sharedMemory.getStatus();  // 获取共享内存状态
