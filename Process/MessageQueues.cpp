@@ -51,54 +51,54 @@ void MessageQueues::onWriteButtonClicked()
 		return;
 	}
 
-	//QueryPerformanceFrequency(&frequency);
-	//QueryPerformanceCounter(&start);
-	//try {
-	//	m_mq->send(inputMessage.c_str(), inputMessage.size(), 0);
-	//	ui.valueInput->clear();
-	//}
-	//catch (const interprocess_exception& ex) {
-	//	QMessageBox::critical(this, "Error",
-	//		QString("Failed to send message: %1").arg(ex.what()));
-	//}
-	//QueryPerformanceCounter(&end);
-	//double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-	//std::cout << "Time elapsed: " << interval << " milliseconds" << std::endl;
-
-	// 用于生成随机字符串的字符集
-	const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	std::default_random_engine generator;
-	std::uniform_int_distribution<size_t> length_dist(256, 256);  // 随机长度分布
-	std::uniform_int_distribution<int> char_dist(0, charset.size() - 1);  // 随机字符分布
-
-	double total_time = 0;
 	QueryPerformanceFrequency(&frequency);
-
-	for (int i = 0; i < 10000; ++i) {
-		// 生成随机消息
-		std::string randomMessage;
-		size_t messageLength = length_dist(generator);
-		for (size_t j = 0; j < messageLength; ++j) {
-			randomMessage += charset[char_dist(generator)];
-		}
-
-		QueryPerformanceCounter(&start);
-		try {
-			m_mq->send(randomMessage.c_str(), randomMessage.size(), 0);
-		}
-		catch (const interprocess_exception& ex) {
-			QMessageBox::critical(this, "Error",
-				QString("Failed to send message: %1").arg(ex.what()));
-			return;
-		}
-		QueryPerformanceCounter(&end);
-
-		// 计算每次消息发送的时间
-		double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-		total_time += interval;
+	QueryPerformanceCounter(&start);
+	try {
+		m_mq->send(inputMessage.c_str(), inputMessage.size(), 0);
+		ui.valueInput->clear();
 	}
+	catch (const interprocess_exception& ex) {
+		QMessageBox::critical(this, "Error",
+			QString("Failed to send message: %1").arg(ex.what()));
+	}
+	QueryPerformanceCounter(&end);
+	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
+	std::cout << "Time elapsed: " << interval << " milliseconds" << std::endl;
 
-	std::cout << "Total time elapsed for sending messages: " << total_time << " milliseconds" << std::endl;
+	//// 用于生成随机字符串的字符集
+	//const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	//std::default_random_engine generator;
+	//std::uniform_int_distribution<size_t> length_dist(1, 255);  // 随机长度分布
+	//std::uniform_int_distribution<int> char_dist(0, charset.size() - 1);  // 随机字符分布
+
+	//double total_time = 0;
+	//QueryPerformanceFrequency(&frequency);
+
+	//for (int i = 0; i < 2000; ++i) {
+	//	// 生成随机消息
+	//	std::string randomMessage;
+	//	size_t messageLength = length_dist(generator);
+	//	for (size_t j = 0; j < messageLength; ++j) {
+	//		randomMessage += charset[char_dist(generator)];
+	//	}
+
+	//	QueryPerformanceCounter(&start);
+	//	try {
+	//		m_mq->send(randomMessage.c_str(), randomMessage.size(), 0);
+	//	}
+	//	catch (const interprocess_exception& ex) {
+	//		QMessageBox::critical(this, "Error",
+	//			QString("Failed to send message: %1").arg(ex.what()));
+	//		return;
+	//	}
+	//	QueryPerformanceCounter(&end);
+
+	//	// 计算每次消息发送的时间
+	//	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
+	//	total_time += interval;
+	//}
+
+	//std::cout << "Total time elapsed for sending messages: " << total_time << " milliseconds" << std::endl;
 }
 
 void MessageQueues::onReadButtonClicked()
@@ -113,49 +113,49 @@ void MessageQueues::onReadButtonClicked()
 	unsigned int priority;
 	double total_time = 0;
 
-	//QueryPerformanceFrequency(&frequency);
-	//QueryPerformanceCounter(&start);
-	//try {
-	//	m_mq->try_receive(buffer, sizeof(buffer), received_size, priority);
-	//	QString outputText = QString::fromLocal8Bit(buffer, received_size);
-	//	ui.valueOutput->setText(outputText);
-	//}
-	//catch (const interprocess_exception& ex) {
-	//	QMessageBox::critical(this, "Error",
-	//		QString("Failed to receive message: %1").arg(ex.what()));
-	//}
-	//QueryPerformanceCounter(&end);
-	//double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-	//std::cout << "Total time elapsed for receive messages: " << interval << " milliseconds" << std::endl;
- // 读取 1000 次消息
-	for (int i = 0; i < 100; ++i) {
-		QueryPerformanceFrequency(&frequency);
-		QueryPerformanceCounter(&start);
-
-		try {
-			// 尝试接收消息
-			if (m_mq->try_receive(buffer, sizeof(buffer), received_size, priority)) {
-				// 如果成功接收到消息，显示输出
-				QString outputText = QString::fromLocal8Bit(buffer, received_size);
-				ui.valueOutput->setText(outputText);
-			}
-			else {
-				// 如果没有消息可接收，可以继续或者退出
-				std::cout << "No message available." << std::endl;
-				continue;  // 可以根据需求决定是否继续或退出
-			}
-		}
-		catch (const interprocess_exception& ex) {
-			QMessageBox::critical(this, "Error",
-				QString("Failed to receive message: %1").arg(ex.what()));
-			return;
-		}
-
-		QueryPerformanceCounter(&end);
-		// 计算每次消息接收所用时间
-		double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-		total_time += interval;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&start);
+	try {
+		m_mq->try_receive(buffer, sizeof(buffer), received_size, priority);
+		QString outputText = QString::fromLocal8Bit(buffer, received_size);
+		ui.valueOutput->setText(outputText);
 	}
+	catch (const interprocess_exception& ex) {
+		QMessageBox::critical(this, "Error",
+			QString("Failed to receive message: %1").arg(ex.what()));
+	}
+	QueryPerformanceCounter(&end);
+	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
+	std::cout << "Total time elapsed for receive messages: " << interval << " milliseconds" << std::endl;
+	//// 读取 1000 次消息
+	   //for (int i = 0; i < 2000; ++i) {
+	   //	QueryPerformanceFrequency(&frequency);
+	   //	QueryPerformanceCounter(&start);
 
-	std::cout << "Total time elapsed for receiving 1000 messages: " << total_time << " milliseconds" << std::endl;
+	   //	try {
+	   //		// 尝试接收消息
+	   //		if (m_mq->try_receive(buffer, sizeof(buffer), received_size, priority)) {
+	   //			// 如果成功接收到消息，显示输出
+	   //			QString outputText = QString::fromLocal8Bit(buffer, received_size);
+	   //			ui.valueOutput->setText(outputText);
+	   //		}
+	   //		else {
+	   //			// 如果没有消息可接收，可以继续或者退出
+	   //			std::cout << "No message available." << std::endl;
+	   //			continue;  // 可以根据需求决定是否继续或退出
+	   //		}
+	   //	}
+	   //	catch (const interprocess_exception& ex) {
+	   //		QMessageBox::critical(this, "Error",
+	   //			QString("Failed to receive message: %1").arg(ex.what()));
+	   //		return;
+	   //	}
+
+	   //	QueryPerformanceCounter(&end);
+	   //	// 计算每次消息接收所用时间
+	   //	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
+	   //	total_time += interval;
+	   //}
+
+	   //std::cout << "Total time elapsed for receiving 1000 messages: " << total_time << " milliseconds" << std::endl;
 }

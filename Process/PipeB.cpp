@@ -5,7 +5,7 @@ PipeB::PipeB(QWidget* parent)
 {
 	ui.setupUi(this);
 
-	connect(ui.readButton, &QPushButton::click, this, &PipeB::onReadButtonClicked);
+	connect(ui.readButton, &QPushButton::clicked, this, &PipeB::onReadButtonClicked);
 }
 
 PipeB::~PipeB()

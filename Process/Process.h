@@ -10,6 +10,8 @@
 #include <QDebug>
 #include <QSharedMemory>
 #include <windows.h>
+#include <iostream>
+#include <random>
 
 class Process : public QMainWindow
 {
@@ -26,10 +28,13 @@ private slots:
 
 private:
 	double getMemoryUsage();
+	QString generateRandomString(int length);
 
 private:
 	Ui::Process ui;
 	SharedMemory m_sharedMemory;// 共享内存对象
 	QProgressBar* memoryUsageBar;
 	QTimer* m_timer;          // 定时器对象
+	LARGE_INTEGER frequency; // 计时器频率
+	LARGE_INTEGER start, end; // 计时器值
 };

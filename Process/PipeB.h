@@ -19,3 +19,4 @@ private:
 	Ui::PipeBClass ui;
 	QProcess* m_process;
 };
+
