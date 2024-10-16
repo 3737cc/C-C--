@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>462</height>
+    <width>322</width>
+    <height>314</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,20 +59,24 @@
        <property name="text">
         <string>队列大小</string>
        </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
       </column>
       <column>
        <property name="text">
         <string>数据大小</string>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>数据数量</string>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
        </property>
       </column>
       <column>
        <property name="text">
         <string>运行时间</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
        </property>
       </column>
      </widget>

@@ -1,9 +1,12 @@
 // messagequeues.cpp
 #include "messagequeues.h"
-
+int m_iCurrentQueueMessages = 0;
 MessageQueues::MessageQueues(QWidget* parent)
-	: QMainWindow(parent),
-	m_iByte(2 * 1024 * 1024)//定义随机发送消息大小
+	: QMainWindow(parent)
+	, m_iByte(2 * 1024 * 1024)//定义随机发送消息大小
+	, m_iMaxByte(4 * 1024 * 1024)//定义最大消息大小
+	, m_iMaxQueueMessages(2)//定义消息数量
+	//, m_iCurrentQueueMessages(0)//跟踪消息数量
 {
 	ui.setupUi(this);
 
@@ -12,7 +15,7 @@ MessageQueues::MessageQueues(QWidget* parent)
 	if (!m_mq) {
 		try {
 			// 创建新的消息队列
-			m_mq = new message_queue(create_only, "message_queue", 2, 4 * 1024 * 1024);
+			m_mq = new message_queue(create_only, "message_queue", m_iMaxQueueMessages, m_iMaxByte);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",
@@ -23,6 +26,9 @@ MessageQueues::MessageQueues(QWidget* parent)
 
 	connect(ui.writeButton, &QPushButton::clicked, this, &MessageQueues::onWriteButtonClicked);
 	connect(ui.readButton, &QPushButton::clicked, this, &MessageQueues::onReadButtonClicked);
+
+	ui.memoryBlockTable->setRowCount(0);
+	ui.memoryBlockTable->setColumnCount(3);
 }
 
 MessageQueues::~MessageQueues() {
@@ -39,13 +45,19 @@ void MessageQueues::onWriteButtonClicked()
 		return;
 	}
 
-	QString inputText = ui.valueInput->text();
+	// 检查消息队列中的消息数量是否已达到最大值
+	if (m_iCurrentQueueMessages >= m_iMaxQueueMessages) {
+		QMessageBox::warning(this, "Warning", "Message queue is full!");
+		return;
+	}
 
+	QString inputText = ui.valueInput->text();
 	std::string inputMessage = inputText.toStdString();
 	if (inputMessage.size() > m_iByte) {
 		QMessageBox::warning(this, "Warning", "Message is too large!");
 		return;
 	}
+
 	size_t l_szLength = m_iByte;
 	double l_dTotal_time = 0;
 
@@ -67,9 +79,23 @@ void MessageQueues::onWriteButtonClicked()
 		double l_dInterval = static_cast<double>(m_end.QuadPart - m_start.QuadPart) * 1000 / m_frequency.QuadPart;
 		l_dTotal_time += l_dInterval;
 	}
+	m_iCurrentQueueMessages++;
+
+	// 获取当前行数，并在末尾插入一行
+	int newRow = ui.memoryBlockTable->rowCount();
+	ui.memoryBlockTable->insertRow(newRow);
+
+	// 将数据填入新增的行
+	m_queue = new QTableWidgetItem(QString::number(m_iMaxQueueMessages * m_iMaxByte));
+	m_byte = new QTableWidgetItem(QString::number(m_iByte));
+	m_time = new QTableWidgetItem(QString::number(l_dTotal_time));
+	ui.memoryBlockTable->setItem(newRow, 0, m_queue);
+	ui.memoryBlockTable->setItem(newRow, 1, m_byte);
+	ui.memoryBlockTable->setItem(newRow, 2, m_time);
 
 	std::cout << "Total time elapsed for sending messages: " << l_dTotal_time << " milliseconds" << std::endl;
 }
+
 
 void MessageQueues::onReadButtonClicked()
 {
@@ -78,7 +104,13 @@ void MessageQueues::onReadButtonClicked()
 		return;
 	}
 
-	std::vector<char> l_cBuffer(4 * 1024 * 1024); // 动态分配内存
+	// 检查消息队列中的消息数量是否已达到最大值
+	if (m_iCurrentQueueMessages <= 0) {
+		QMessageBox::warning(this, "Warning", "Message queue is full!");
+		return;
+	}
+
+	std::vector<char> l_cBuffer(m_iMaxByte); // 动态分配内存
 	size_t l_szReceivedSize = 0;
 	unsigned int l_uPriority;
 	double l_dTotalTime = 0;
@@ -110,7 +142,7 @@ void MessageQueues::onReadButtonClicked()
 		double l_dInterval = static_cast<double>(m_end.QuadPart - m_start.QuadPart) * 1000 / m_frequency.QuadPart;
 		l_dTotalTime += l_dInterval;
 	}
-
+	m_iCurrentQueueMessages--;
 	std::cout << "Total time elapsed for receiving  messages: " << l_dTotalTime << " milliseconds" << std::endl;
 }
 

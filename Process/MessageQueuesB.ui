@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>478</width>
-    <height>463</height>
+    <width>336</width>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,11 +63,6 @@
       <column>
        <property name="text">
         <string>数据大小</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>数据数量</string>
        </property>
       </column>
       <column>
