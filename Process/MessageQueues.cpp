@@ -59,7 +59,7 @@ void MessageQueues::onWriteButtonClicked()
 	}
 
 	size_t l_szLength = m_iByte;
-	double l_dTotal_time = 0;
+	double l_dTotalTime = 0;
 
 	for (int i = 0; i < 1; ++i) {
 		std::string l_szRandomMessage = generateRandomSring(l_szLength);
@@ -77,7 +77,7 @@ void MessageQueues::onWriteButtonClicked()
 
 		// 计算每次消息发送的时间
 		double l_dInterval = static_cast<double>(m_end.QuadPart - m_start.QuadPart) * 1000 / m_frequency.QuadPart;
-		l_dTotal_time += l_dInterval;
+		l_dTotalTime += l_dInterval;
 	}
 	m_iCurrentQueueMessages++;
 
@@ -88,12 +88,12 @@ void MessageQueues::onWriteButtonClicked()
 	// 将数据填入新增的行
 	m_queue = new QTableWidgetItem(QString::number(m_iMaxQueueMessages * m_iMaxByte));
 	m_byte = new QTableWidgetItem(QString::number(m_iByte));
-	m_time = new QTableWidgetItem(QString::number(l_dTotal_time));
+	m_time = new QTableWidgetItem(QString::number(l_dTotalTime));
 	ui.memoryBlockTable->setItem(newRow, 0, m_queue);
 	ui.memoryBlockTable->setItem(newRow, 1, m_byte);
 	ui.memoryBlockTable->setItem(newRow, 2, m_time);
 
-	std::cout << "Total time elapsed for sending messages: " << l_dTotal_time << " milliseconds" << std::endl;
+	std::cout << "Total time elapsed for sending messages: " << l_dTotalTime << " milliseconds" << std::endl;
 }
 
 
@@ -143,6 +143,17 @@ void MessageQueues::onReadButtonClicked()
 		l_dTotalTime += l_dInterval;
 	}
 	m_iCurrentQueueMessages--;
+	// 获取当前行数，并在末尾插入一行
+	int newRow = ui.memoryBlockTable->rowCount();
+	ui.memoryBlockTable->insertRow(newRow);
+
+	// 将数据填入新增的行
+	m_queue = new QTableWidgetItem(QString::number(m_iMaxQueueMessages * m_iMaxByte));
+	m_byte = new QTableWidgetItem(QString::number(m_iByte));
+	m_time = new QTableWidgetItem(QString::number(l_dTotalTime));
+	ui.memoryBlockTable->setItem(newRow, 0, m_queue);
+	ui.memoryBlockTable->setItem(newRow, 1, m_byte);
+	ui.memoryBlockTable->setItem(newRow, 2, m_time);
 	std::cout << "Total time elapsed for receiving  messages: " << l_dTotalTime << " milliseconds" << std::endl;
 }
 
