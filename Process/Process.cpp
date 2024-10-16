@@ -135,29 +135,45 @@ void Process::onReadButtonClicked() {
 //	std::cout << "传输运行时间：" << interval << " ms" << std::endl;
 //}
 void Process::onWriteButtonClicked() {
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&start);
-
-	int numberOfEntries = 50000;
+	const int numberOfEntries = 1;
+	const int testRuns = 10;  // 进行多次测试
+	double totalTime = 0.0;   // 记录总时间
 	QStringList dataToWrite;
+
+	// 生成随机数据（每次生成相同的大小）
 	for (int i = 0; i < numberOfEntries; ++i) {
-		QString randomData = generateRandomString(25); // 每条随机数据为10个字符
+		QString randomData = generateRandomString(1);  // 每条随机数据
 		dataToWrite.append(randomData);
 	}
 
-	QString dataString = dataToWrite.join(","); // 将所有数据合并成一个大字符串
+	QString dataString = dataToWrite.join(",");  // 将所有数据合并成一个大字符串
 
-	if (m_sharedMemory.Write(dataString)) {
-		qDebug() << "A:Data written to shared memory. Total size:" << dataString.size();
-	}
-	else {
-		qDebug() << "A:Failed to write data to shared memory.";
+	LARGE_INTEGER frequency, start, end;
+	QueryPerformanceFrequency(&frequency);  // 获取频率
+
+	for (int run = 0; run < testRuns; ++run) {
+
+		// 开始计时
+		QueryPerformanceCounter(&start);
+
+		// 执行写入操作
+		m_sharedMemory.Write(dataString);
+
+		// 结束计时
+		QueryPerformanceCounter(&end);
+
+		// 计算运行时间 (毫秒)
+		double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
+		std::cout << "运行时间 (" << run + 1 << "): " << interval << " ms" << std::endl;
+
+		totalTime += interval;  // 累加时间
 	}
 
-	QueryPerformanceCounter(&end);
-	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-	std::cout << "传输运行时间：" << interval << " ms" << std::endl;
+	// 计算平均时间
+	double averageTime = totalTime / testRuns;
+	std::cout << "平均写入时间: " << averageTime << " ms" << std::endl;
 }
+
 
 void Process::updateMemoryUsage() {
 	double memoryUsagePercent = getMemoryUsage();

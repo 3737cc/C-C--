@@ -10,8 +10,8 @@ MessageQueuesB::MessageQueuesB(QWidget* parent)
 	// 尝试创建或打开消息队列
 	if (!m_mq) {
 		try {
-			// 创建新的消息队列
-			m_mq = new message_queue(open_or_create, "message_queue", 100000, sizeof(char) * 256);
+			// 创建或打开新的消息队列
+			m_mq = new message_queue(open_or_create, "message_queue", 2, 4 * 1024 * 1024);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",
@@ -67,13 +67,14 @@ void MessageQueuesB::onReadButtonClicked()
 		return;
 	}
 
-	char buffer[256] = {};
-	size_t received_size = 0;
-	unsigned int priority;
+	std::vector<char> l_cBuffer(4 * 1024 * 1024);
+	//char buffer[256] = {};
+	size_t l_szReceivedSize = 0;
+	unsigned int l_uPriority;
 
 	try {
-		m_mq->try_receive(buffer, sizeof(buffer), received_size, priority);
-		QString outputText = QString::fromLocal8Bit(buffer, received_size);
+		m_mq->try_receive(l_cBuffer.data(), l_cBuffer.size(), l_szReceivedSize, l_uPriority);
+		QString outputText = QString::fromLocal8Bit(l_cBuffer.data(), l_szReceivedSize);
 		ui.valueOutput->setText(outputText);
 	}
 	catch (const interprocess_exception& ex) {

@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
 	//pA.show();
 	//pB.show();
 	MessageQueues m;
-	MessageQueuesB mb;
+	//MessageQueuesB mb;
 	m.show();
-	mb.show();
+	//mb.show();
 	//Process pA;
 	//ProcessB pB;
 	//pA.show();
