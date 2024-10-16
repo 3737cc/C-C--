@@ -24,140 +24,50 @@ Process::Process(QWidget* parent)
 	m_timer->start(1000); // 每秒更新内存使用情况
 }
 
-//void Process::onSizeButtonClicked() {
-//	QString l_szSize = ui.sizeInput->text();
-//	int l_lSize = l_szSize.toInt();
-//	m_sharedMemory.Resize(l_lSize);
-//}
-
 void Process::onReadButtonClicked() {
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&start);
+	QueryPerformanceFrequency(&m_frequency);
+	QueryPerformanceCounter(&m_start);
 
 	QString data = m_sharedMemory.Read(); // 从共享内存读取数据
-	QStringList dataList = data.split(",");
+	QStringList l_dataList = data.split(",");
 
-	QueryPerformanceCounter(&end);
-	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-	std::cout << "读取运行时间： " << interval << " ms" << std::endl;
+	QueryPerformanceCounter(&m_end);
+	double l_dInterval = static_cast<double>(m_end.QuadPart - m_start.QuadPart) * 1000 / m_frequency.QuadPart;
+	std::cout << "读取运行时间： " << l_dInterval << " ms" << std::endl;
 
-	if (dataList.isEmpty()) {
+	if (l_dataList.isEmpty()) {
 		qDebug() << "A:No data found in shared memory.";
 	}
 	else {
-		qDebug() << "A:Data read from shared memory, total count: " << dataList.size();
-		ui.valueOutput->setText(dataList.join(",")); // 显示所有读取的数据
+		qDebug() << "A:Data read from shared memory, total count: " << l_dataList.size();
+		ui.valueOutput->setText(l_dataList.join(",")); // 显示所有读取的数据
 	}
 }
 
-//void Process::onReadButtonClicked() {
-//	QueryPerformanceFrequency(&frequency);
-//	QueryPerformanceCounter(&start);
-//	QString data = m_sharedMemory.Read(); // 从共享内存读取数据
-//	QueryPerformanceCounter(&end);
-//	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-//	std::cout << "读取运行时间： " << interval << " ms" << std::endl;
-//	if (!data.isEmpty()) {
-//		qDebug() << "A:Data read from shared memory:" << data;
-//		ui.valueOutput->setText(data);
-//
-//		void* address = m_sharedMemory.getAddress(); // 获取共享内存地址
-//		size_t size = m_sharedMemory.getSize();      // 获取共享内存大小
-//		QString status = m_sharedMemory.getStatus();  // 获取共享内存状态
-//
-//		// 在memoryBlockTable中添加行
-//		int rowCount = ui.memoryBlockTable->rowCount();
-//		ui.memoryBlockTable->insertRow(rowCount); // 在最后插入新行
-//
-//		// 将数据填入新行
-//		ui.memoryBlockTable->setItem(rowCount, 0, new QTableWidgetItem(QString::number(reinterpret_cast<quintptr>(address)))); // 地址
-//		ui.memoryBlockTable->setItem(rowCount, 1, new QTableWidgetItem(QString::number(size))); // 大小
-//		ui.memoryBlockTable->setItem(rowCount, 2, new QTableWidgetItem(status)); // 状态
-//	}
-//	else {
-//		qDebug() << "A:No data found in shared memory.";
-//	}
-//}
-
-//void Process::onReadButtonClicked() {
-//	QueryPerformanceFrequency(&frequency);
-//	QueryPerformanceCounter(&start);
-//
-//	QString data = m_sharedMemory.Read(); // 从共享内存读取数据
-//	QStringList dataList = data.split(","); // 按逗号分割成单个条目
-//
-//	QueryPerformanceCounter(&end);
-//	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-//	std::cout << "总读取运行时间： " << interval << " ms" << std::endl;
-//
-//	// 每次读取1000条数据
-//	int totalDataCount = dataList.size();
-//	int batchSize = 1000;
-//	int batches = totalDataCount / batchSize + (totalDataCount % batchSize == 0 ? 0 : 1);
-//
-//	for (int i = 0; i < batches; ++i) {
-//		QueryPerformanceCounter(&start);
-//
-//		QStringList batchData = dataList.mid(i * batchSize, batchSize);
-//		QString displayData = batchData.join(",");
-//		qDebug() << "A:Reading batch " << i + 1 << " of " << batches << ", data size: " << batchData.size();
-//
-//		ui.valueOutput->setText(displayData); // 显示当前批次数据
-//
-//		QueryPerformanceCounter(&end);
-//		interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-//		std::cout << "批次 " << i + 1 << " 读取时间：" << interval << " ms" << std::endl;
-//	}
-//
-//	if (dataList.isEmpty()) {
-//		qDebug() << "A:No data found in shared memory.";
-//	}
-//	else {
-//		qDebug() << "A:Data read from shared memory, total count: " << totalDataCount;
-//	}
-//}
-
-
-//void Process::onWriteButtonClicked() {
-//	QueryPerformanceFrequency(&frequency);
-//	QueryPerformanceCounter(&start);
-//	QString dataToWrite = ui.valueInput->text();
-//	int size = dataToWrite.size();
-//	std::cout << "数据大小：" << size << std::endl;
-//	if (m_sharedMemory.Write(dataToWrite)) {
-//		qDebug() << "A:Data written to shared memory:" << dataToWrite;
-//	}
-//	else {
-//		qDebug() << "A:Failed to write data to shared memory.";
-//	}
-//	QueryPerformanceCounter(&end);
-//	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000 / frequency.QuadPart;
-//	std::cout << "传输运行时间：" << interval << " ms" << std::endl;
-//}
 void Process::onWriteButtonClicked() {
-	const int numberOfEntries = 1;
-	const int testRuns = 10;  // 进行多次测试
-	double totalTime = 0.0;   // 记录总时间
-	QStringList dataToWrite;
+	const int l_iNumberOfEntries = 1;
+	const int l_iTestRuns = 10;  // 进行多次测试
+	double l_dTotalTime = 0.0;   // 记录总时间
+	QStringList l_dataToWrite;
 
 	// 生成随机数据（每次生成相同的大小）
-	for (int i = 0; i < numberOfEntries; ++i) {
+	for (int i = 0; i < l_iNumberOfEntries; ++i) {
 		QString randomData = generateRandomString(1);  // 每条随机数据
-		dataToWrite.append(randomData);
+		l_dataToWrite.append(randomData);
 	}
 
-	QString dataString = dataToWrite.join(",");  // 将所有数据合并成一个大字符串
+	QString l_dataString = l_dataToWrite.join(",");  // 将所有数据合并成一个大字符串
 
 	LARGE_INTEGER frequency, start, end;
 	QueryPerformanceFrequency(&frequency);  // 获取频率
 
-	for (int run = 0; run < testRuns; ++run) {
+	for (int run = 0; run < l_iTestRuns; ++run) {
 
 		// 开始计时
 		QueryPerformanceCounter(&start);
 
 		// 执行写入操作
-		m_sharedMemory.Write(dataString);
+		m_sharedMemory.Write(l_dataString);
 
 		// 结束计时
 		QueryPerformanceCounter(&end);
@@ -166,40 +76,40 @@ void Process::onWriteButtonClicked() {
 		double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
 		std::cout << "运行时间 (" << run + 1 << "): " << interval << " ms" << std::endl;
 
-		totalTime += interval;  // 累加时间
+		l_dTotalTime += interval;  // 累加时间
 	}
 
 	// 计算平均时间
-	double averageTime = totalTime / testRuns;
-	std::cout << "平均写入时间: " << averageTime << " ms" << std::endl;
+	double l_dAverageTime = l_dTotalTime / l_iTestRuns;
+	std::cout << "平均写入时间: " << l_dAverageTime << " ms" << std::endl;
 }
 
 
 void Process::updateMemoryUsage() {
-	double memoryUsagePercent = getMemoryUsage();
-	ui.memoryUsageBar->setValue(static_cast<int>(memoryUsagePercent));
+	double l_dMemoryUsagePercent = getMemoryUsage();
+	ui.memoryUsageBar->setValue(static_cast<int>(l_dMemoryUsagePercent));
 }
 
 double Process::getMemoryUsage() {
-	MEMORYSTATUSEX memoryStatus;
-	memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
+	MEMORYSTATUSEX l_memoryStatus;
+	l_memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
 
 	// 获取内存状态
-	if (GlobalMemoryStatusEx(&memoryStatus)) {
-		double totalMemory = memoryStatus.ullTotalPhys; // 物理内存总量
-		double freeMemory = memoryStatus.ullAvailPhys;  // 可用物理内存
+	if (GlobalMemoryStatusEx(&l_memoryStatus)) {
+		double l_dTotalMemory = l_memoryStatus.ullTotalPhys; // 物理内存总量
+		double l_dFreeMemory = l_memoryStatus.ullAvailPhys;  // 可用物理内存
 
 		// 计算已用内存的百分比
-		double usedMemory = totalMemory - freeMemory;
-		return (usedMemory / totalMemory) * 100.0;
+		double l_dUsedMemory = l_dTotalMemory - l_dFreeMemory;
+		return (l_dUsedMemory / l_dTotalMemory) * 100.0;
 	}
 	return 0.0; // 获取内存状态失败
 }
 
-QString Process::generateRandomString(int length) {
+QString Process::generateRandomString(int l_iLength) {
 	const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	QString randomString;
-	for (int i = 0; i < length; ++i) {
+	for (int i = 0; i < l_iLength; ++i) {
 		int index = rand() % possibleCharacters.length();
 		randomString.append(possibleCharacters.at(index));
 	}

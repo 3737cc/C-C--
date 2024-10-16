@@ -35,6 +35,6 @@ private:
 	SharedMemory m_sharedMemory;// 共享内存对象
 	QProgressBar* memoryUsageBar;
 	QTimer* m_timer;          // 定时器对象
-	LARGE_INTEGER frequency; // 计时器频率
-	LARGE_INTEGER start, end; // 计时器值
+	LARGE_INTEGER m_frequency; // 计时器频率
+	LARGE_INTEGER m_start, m_end; // 计时器值
 };

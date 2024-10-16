@@ -46,9 +46,6 @@
     <ClCompile Include="ProcessB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Semaphore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,12 +56,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessageQueuesB.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Pipe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PipeB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,19 +74,10 @@
     <QtMoc Include="ProcessB.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Semaphore.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="MessageQueues.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="MessageQueuesB.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Pipe.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="PipeB.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -103,19 +85,10 @@
     <QtUic Include="ProcessB.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="Semaphore.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="MessageQueues.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="MessageQueuesB.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="Pipe.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="PipeB.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

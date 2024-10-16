@@ -3,7 +3,7 @@
 
 MessageQueues::MessageQueues(QWidget* parent)
 	: QMainWindow(parent),
-	m_iByte(4 * 1024 * 1024)
+	m_iByte(2 * 1024 * 1024)//定义随机发送消息大小
 {
 	ui.setupUi(this);
 
@@ -12,7 +12,7 @@ MessageQueues::MessageQueues(QWidget* parent)
 	if (!m_mq) {
 		try {
 			// 创建新的消息队列
-			m_mq = new message_queue(create_only, "message_queue", 2, m_iByte);
+			m_mq = new message_queue(create_only, "message_queue", 2, 4 * 1024 * 1024);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",
@@ -78,7 +78,7 @@ void MessageQueues::onReadButtonClicked()
 		return;
 	}
 
-	std::vector<char> l_cBuffer(m_iByte); // 动态分配内存
+	std::vector<char> l_cBuffer(4 * 1024 * 1024); // 动态分配内存
 	size_t l_szReceivedSize = 0;
 	unsigned int l_uPriority;
 	double l_dTotalTime = 0;
