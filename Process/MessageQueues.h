@@ -27,6 +27,7 @@ private slots:
 private:
 	Ui::MessageQueuesClass ui;
 	message_queue* m_mq;
+	const int m_iByte;
 	LARGE_INTEGER m_frequency; // 计时器频率
 	LARGE_INTEGER m_start, m_end; // 计时器值
 };
