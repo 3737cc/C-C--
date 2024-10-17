@@ -64,6 +64,8 @@
     <LibraryPath>E:\C++_Test\Communication\boost_1_86_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>E:\C++_Test\Communication\boost_1_86_0;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\C++_Test\Communication\boost_1_86_0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

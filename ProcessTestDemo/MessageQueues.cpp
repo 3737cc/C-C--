@@ -239,6 +239,7 @@ void MessageQueues::autoSendMessage()
 void MessageQueues::onStartAutoSendingClicked()
 {
 	startAutoSending();
+	//startAutoReading();  // 点击按钮时启动自动读取数据
 }
 
 void MessageQueues::startAutoReading()
