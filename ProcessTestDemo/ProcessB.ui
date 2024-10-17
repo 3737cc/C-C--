@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>213</width>
-    <height>168</height>
+    <width>408</width>
+    <height>413</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,17 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="addressLabel">
-      <property name="text">
-       <string>读取的值：</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="addressInput"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="valueLabel">
+     <widget class="QLabel" name="valueInputLabel">
       <property name="text">
        <string>传输的值：</string>
       </property>
@@ -36,17 +26,55 @@
      <widget class="QLineEdit" name="valueInput"/>
     </item>
     <item>
-     <widget class="QPushButton" name="readButton">
+     <widget class="QLabel" name="valueOutputLabel">
       <property name="text">
-       <string>读取</string>
+       <string>读取的值：</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="writeButton">
-      <property name="text">
-       <string>写入</string>
-      </property>
+     <widget class="QLineEdit" name="valueOutput"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="writeButton">
+        <property name="text">
+         <string>写入</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="readButton">
+        <property name="text">
+         <string>读取</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="memoryBlockTable">
+      <column>
+       <property name="text">
+        <string>内存大小</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据数量</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据字节</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>运行时间</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

@@ -8,9 +8,9 @@
 #include <Windows.h>
 #include <QMessageBox>
 #include <random>
+#include <QTimer>
 
 using namespace boost::interprocess;
-extern int m_iCurrentQueueMessages; //标志量
 
 class MessageQueues : public QMainWindow
 {
@@ -24,15 +24,24 @@ private slots:
 	void onReadButtonClicked();
 
 	std::string generateRandomSring(size_t length);
+
+	void startAutoSending();
+	void autoSendMessage();
+	void onStartAutoSendingClicked();
+	void startAutoReading();
+	void autoReadMessage();
+	void onStartAutoReadingClicked();
+
 private:
 	Ui::MessageQueuesClass ui;
 	message_queue* m_mq;
-	const int m_iByte;//随机发送消息大小
-	const int m_iMaxByte;//最大消息大小
-	const int m_iMaxQueueMessages;//消息队列最大消息数量
 	LARGE_INTEGER m_frequency; // 计时器频率
 	LARGE_INTEGER m_start, m_end; // 计时器值
 	//列表值更新
+	const int m_iByte;//随机发送消息大小
+	int m_iNumQM;
+	const int m_iMaxByte;//最大消息大小
+	const int m_iMaxQueueMessages;//消息队列最大消息数量
 	QTableWidgetItem* m_queue;//队列大小
 	QTableWidgetItem* m_byte;
 	QTableWidgetItem* m_time;

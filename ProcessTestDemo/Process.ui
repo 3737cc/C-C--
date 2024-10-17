@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>571</width>
-    <height>522</height>
+    <width>431</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,17 +60,12 @@
      <widget class="QTableWidget" name="memoryBlockTable">
       <column>
        <property name="text">
-        <string>地址</string>
+        <string>内存大小</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>大小</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>状态</string>
+        <string>数据数量</string>
        </property>
       </column>
       <column>
@@ -84,9 +79,6 @@
        </property>
       </column>
      </widget>
-    </item>
-    <item>
-     <widget class="QTextEdit" name="logTextEdit"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">

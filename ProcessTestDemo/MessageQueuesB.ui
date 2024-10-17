@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>361</height>
+    <width>426</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,6 +48,24 @@
        <widget class="QPushButton" name="readButton">
         <property name="text">
          <string>读取</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="autoWriteButton">
+        <property name="text">
+         <string>自动写入</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="autoReadButton">
+        <property name="text">
+         <string>自动读取</string>
         </property>
        </widget>
       </item>
