@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
-    <height>381</height>
+    <width>536</width>
+    <height>430</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,26 +15,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QLabel" name="valueInputLabel">
-      <property name="text">
-       <string>传输的值：</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="valueInput"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="valueOutputLabel">
-      <property name="text">
-       <string>读取的值：</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="valueOutput"/>
-    </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -72,6 +52,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QPushButton" name="stopButton">
+      <property name="text">
+       <string>暂停自动读取写入</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTableWidget" name="memoryBlockTable">
       <column>
        <property name="text">
@@ -91,6 +78,22 @@
       </column>
       <column>
        <property name="text">
+        <string>读写数量</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据剩余数量</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>运行时间</string>
        </property>
        <property name="textAlignment">
@@ -98,6 +101,26 @@
        </property>
       </column>
      </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueInputLabel">
+      <property name="text">
+       <string>数据发送：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="writePlainTextEdit"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueOutputLabel">
+      <property name="text">
+       <string>数据接收：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="readPlainTextEdit"/>
     </item>
    </layout>
   </widget>
