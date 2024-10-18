@@ -3,12 +3,12 @@
 
 #include "ui_messagequeues.h"
 #include <QMainWindow>
-#include <MessageQueueManager.h>
 #include <iostream>
 #include <Windows.h>
 #include <QMessageBox>
 #include <random>
 #include <QTimer>
+#include <MessageQueueManager.h>
 
 class MessageQueues : public QMainWindow
 {
@@ -20,32 +20,24 @@ public:
 private slots:
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
-	//void startAutoSending();
-	//void autoSendMessage();
-	//void onStartAutoSendingClicked();
-	//void startAutoReading();
-	//void autoReadMessage();
-	//void onStartAutoReadingClicked();
-
-	std::string generateRandomSring(size_t length);
 
 private:
 	Ui::MessageQueuesClass ui;
 	MessageQueueManager m_queueManager;
-
-	// 性能计数器变量
-	LARGE_INTEGER m_frequency;
-	LARGE_INTEGER m_start;
-	LARGE_INTEGER m_end;
-
-	// 表格项
-	QTableWidgetItem* m_queue;
+	LARGE_INTEGER m_frequency; // 计时器频率
+	LARGE_INTEGER m_start, m_end; // 计时器值
+	//列表值更新
+	const int m_iSetByte;//随机发送消息大小
+	int m_iNumQM;
+	int m_iMaxNum;
+	int m_iMinNum;
+	int m_iSumNum;
+	int m_iNum;//当前消息数量
+	const int m_iMaxByte;//最大消息大小
+	const int m_iMaxQueueMessages;//消息队列最大消息数量
+	QTableWidgetItem* m_queue;//队列大小
 	QTableWidgetItem* m_byte;
+	QTableWidgetItem* m_sumQueueMessages;
+	QTableWidgetItem* m_numQueueMessages;//剩余数据量
 	QTableWidgetItem* m_time;
-
-	// 配置参数
-	const int m_iByte;
-	const int m_iNumQM;
-	const int m_iMaxByte;
-	const int m_iMaxQueueMessages;
 };

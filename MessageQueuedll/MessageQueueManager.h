@@ -1,14 +1,22 @@
-#pragma once
+#ifndef MESSAGE_QUEUE_MANAGER_H
+#define MESSAGE_QUEUE_MANAGER_H
+
+#ifdef MESSAGEQUEUEAPI
+#define MESSAGEQUEUEAPI __declspec(dllexport)
+#else
+#define MESSAGEQUEUEAPI __declspec(dllimport)
+#endif
+
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <string>
 #include <vector>
 
 using namespace boost::interprocess;
 
-class MessageQueueManager {
+class MESSAGEQUEUEAPI MessageQueueManager {
 public:
 	MessageQueueManager();
-	~MessageQueueManager();
+	virtual ~MessageQueueManager();
 
 	// 初始化消息队列
 	bool initialize(const char* queueName, size_t maxMessages, size_t maxMessageSize);
@@ -37,3 +45,5 @@ private:
 	size_t m_maxMessages;
 	bool m_initialized;
 };
+
+#endif // MESSAGE_QUEUE_MANAGER_H
