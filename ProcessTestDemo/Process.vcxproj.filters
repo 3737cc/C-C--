@@ -46,9 +46,6 @@
     <ClCompile Include="ProcessB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Message.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Signal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,10 +60,10 @@
     <ClInclude Include="SharedMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Message.h">
+    <ClInclude Include="Signal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Signal.h">
+    <ClInclude Include="MessageQueueManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

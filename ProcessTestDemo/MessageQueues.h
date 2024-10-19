@@ -3,14 +3,12 @@
 
 #include "ui_messagequeues.h"
 #include <QMainWindow>
-#include <boost/interprocess/ipc/message_queue.hpp>
 #include <iostream>
 #include <Windows.h>
 #include <QMessageBox>
 #include <random>
 #include <QTimer>
-
-using namespace boost::interprocess;
+#include <MessageQueueManager.h>
 
 class MessageQueues : public QMainWindow
 {
@@ -23,19 +21,19 @@ private slots:
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
 
-	std::string generateRandomSring(size_t length);
+	//std::string generateRandomSring(size_t length);
 
-	void startAutoSending();
-	void autoSendMessage();
-	void onStartAutoSendingClicked();
-	void startAutoReading();
-	void autoReadMessage();
-	void onStartAutoReadingClicked();
-	void stopAuto();
+	//void startAutoSending();
+	//void autoSendMessage();
+	//void onStartAutoSendingClicked();
+	//void startAutoReading();
+	//void autoReadMessage();
+	//void onStartAutoReadingClicked();
+	//void stopAuto();
 
 private:
 	Ui::MessageQueuesClass ui;
-	message_queue* m_mq;
+	MessageQueueManager m_queueManager;
 	LARGE_INTEGER m_frequency; // 计时器频率
 	LARGE_INTEGER m_start, m_end; // 计时器值
 	QTimer* m_timerSend;  // 定时器成员变量

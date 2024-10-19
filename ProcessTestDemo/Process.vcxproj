@@ -69,7 +69,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalLibraryDirectories>E:\C++_Test\Communication\boost_1_86_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\C++_Test\Communication\Process\commSdk\MessageQueueManager\lib\Debug;E:\C++_Test\Communication\boost_1_86_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>MessageQueuesDll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>E:\C++_Test\Communication\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -104,7 +105,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Message.cpp" />
     <ClCompile Include="MessageQueues.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -125,11 +125,11 @@
     <QtUic Include="ProcessB.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MessageQueueManager.h" />
     <QtMoc Include="MessageQueuesB.h" />
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="MessageQueues.h" />
-    <ClInclude Include="Message.h" />
     <ClInclude Include="SharedMemory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
