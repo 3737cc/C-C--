@@ -60,17 +60,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>E:\C++_Test\Communication\boost_1_86_0;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\C++_Test\Communication\boost_1_86_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>E:\C++_Test\Communication\boost_1_86_0;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\C++_Test\Communication\boost_1_86_0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalLibraryDirectories>E:\C++_Test\Communication\boost_1_86_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>./commSdk/boost/lib/libboost_system-vc142-mt-gd-x64-1_86.lib;./commSdk/MessageQueueManager/lib/Debug/MessageQueuesDll.lib;./commSdk/SharedMemory/lib/Debug/ShraedmemoryDll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>E:\C++_Test\Communication\boost_1_86_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./commSdk/boost;./commSdk/SharedMemory;./commSdk/MessageQueueManager;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SHAREDMEMORYAPI;MESSAGEQUEUEAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -102,7 +106,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Message.cpp" />
     <ClCompile Include="MessageQueues.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -111,7 +114,6 @@
     </ClCompile>
     <ClCompile Include="MessageQueuesB.cpp" />
     <ClCompile Include="ProcessB.cpp" />
-    <ClCompile Include="SharedMemory.cpp" />
     <ClCompile Include="Signal.cpp" />
     <QtRcc Include="Process.qrc" />
     <QtUic Include="MessageQueues.ui" />
@@ -127,8 +129,6 @@
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="MessageQueues.h" />
-    <ClInclude Include="Message.h" />
-    <ClInclude Include="SharedMemory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>213</width>
-    <height>168</height>
+    <width>480</width>
+    <height>480</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>ProcessB</string>
@@ -16,38 +22,88 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="addressLabel">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>读取的值：</string>
+       <string>共享内存通信：</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::RichText</enum>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="addressInput"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="valueLabel">
+     <widget class="QPushButton" name="createButton">
       <property name="text">
-       <string>传输的值：</string>
+       <string>创建或连接共享内存</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="valueInput"/>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="writeButton">
+        <property name="text">
+         <string>写入</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="readButton">
+        <property name="text">
+         <string>读取</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="readButton">
+     <widget class="QTableWidget" name="memoryBlockTable">
+      <column>
+       <property name="text">
+        <string>内存大小</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>消息数量</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>数据字节</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>运行时间</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueInputLabel">
       <property name="text">
-       <string>读取</string>
+       <string>数据发送：</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="writeButton">
+     <widget class="QTextEdit" name="sendTextEdit"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueOutputLabel">
       <property name="text">
-       <string>写入</string>
+       <string>数据接受：</string>
       </property>
      </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="readTextEdit"/>
     </item>
    </layout>
   </widget>
