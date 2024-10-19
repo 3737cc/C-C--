@@ -10,8 +10,6 @@
 #include <iostream>
 #include <QMessageBox>
 
-extern int g_iSharedMemoryMessages;
-
 class Process : public QMainWindow
 {
 	Q_OBJECT
@@ -20,8 +18,9 @@ public:
 	Process(QWidget* parent = nullptr);
 
 private slots:
-	void onReadButtonClicked();
 	void onWriteButtonClicked();
+	void onReadButtonClicked();
+	void onCreateOrOpenClicked();
 
 private:
 	Ui::Process ui;

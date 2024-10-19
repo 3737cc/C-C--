@@ -2,139 +2,119 @@
 
 ProcessB::ProcessB(QWidget* parent)
 	: QMainWindow(parent)
-	, m_sharedMemory("MySharedMemoryKey") // 初始化共享内存，使用相同的键
+	, m_sharedMemory("SharedMemoryKey")
 	, m_iMaxSharedMemory(1024 * 1024 * 4)
-	, m_iByte(10)//发送字节大小
-	, m_iNumberOfEntries(100)//测试数据数量
-	, l_iTestRuns(1)//测试次数
+	, m_iTestRuns(1)
 {
 	ui.setupUi(this);
 
 	QObject::connect(ui.readButton, &QPushButton::clicked, this, &ProcessB::onReadButtonClicked);
 	QObject::connect(ui.writeButton, &QPushButton::clicked, this, &ProcessB::onWriteButtonClicked);
-
-	// 连接共享内存
-	if (!m_sharedMemory.Attach()) {
-		qDebug() << "Unable to connect to shared memory.";
-	}
+	QObject::connect(ui.createButton, &QPushButton::clicked, this, &ProcessB::onCreateOrOpenClicked);
+	setWindowTitle("Memory Usage MonitorB");
 
 	ui.memoryBlockTable->setRowCount(0);
 	ui.memoryBlockTable->setColumnCount(4);
 }
 
+void ProcessB::onCreateOrOpenClicked() {
+	// 连接共享内存
+	if (!m_sharedMemory.Attach()) {
+		qDebug() << "Unable to connect to shared memory.";
+	}
+	//// 创建并初始化队列
+	//if (!m_sharedMemory.Create(m_iMaxSharedMemory)) {
+	//	qDebug() << "Failed to create shared memory.";
+	//}
+	//else {
+	//	// 初始化队列，设置每个元素的最大大小为1KB
+	//	if (!m_sharedMemory.InitializeQueue(1024)) {
+	//		qDebug() << "Failed to initialize queue.";
+	//	}
+	//}
+}
+
+void ProcessB::onWriteButtonClicked() {
+	if (m_sharedMemory.IsFull()) {
+		QMessageBox::warning(this, "Warning", "Queue is full!");
+		return;
+	}
+
+	double l_dTotalTime = 0.0;
+	QString l_dataString = ui.sendTextEdit->toPlainText();
+
+	LARGE_INTEGER frequency, start, end;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&start);
+
+	// 将数据入队
+	if (!m_sharedMemory.Enqueue(l_dataString)) {
+		QMessageBox::warning(this, "Error", "Failed to write to queue!");
+		return;
+	}
+
+	QueryPerformanceCounter(&end);
+	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
+	std::cout << "运行时间 " << interval << " ms" << std::endl;
+
+	// 更新表格
+	int l_iNewRow = ui.memoryBlockTable->rowCount();
+	ui.memoryBlockTable->insertRow(l_iNewRow);
+	size_t l_szDataSize = m_sharedMemory.GetQueueSize();
+	QByteArray l_byteArray = l_dataString.toUtf8();
+	int l_iByteSize = l_byteArray.size();
+
+	m_shared = new QTableWidgetItem(QString::number(m_iMaxSharedMemory));
+	m_numberOfEntries = new QTableWidgetItem(QString::number(l_szDataSize));
+	m_byte = new QTableWidgetItem(QString::number(l_iByteSize));
+	m_time = new QTableWidgetItem(QString::number(interval));
+
+	ui.memoryBlockTable->setItem(l_iNewRow, 0, m_shared);
+	ui.memoryBlockTable->setItem(l_iNewRow, 1, m_numberOfEntries);
+	ui.memoryBlockTable->setItem(l_iNewRow, 2, m_byte);
+	ui.memoryBlockTable->setItem(l_iNewRow, 3, m_time);
+	ui.memoryBlockTable->scrollToBottom();
+}
+
 void ProcessB::onReadButtonClicked() {
-	if (g_iSharedMemoryMessages <= 0) {
-		QMessageBox::warning(this, "Warning", "Shared memory is full!");
+	if (m_sharedMemory.IsEmpty()) {
+		QMessageBox::warning(this, "Warning", "Queue is empty!");
 		return;
 	}
 
 	QueryPerformanceFrequency(&m_frequency);
 	QueryPerformanceCounter(&m_start);
 
-	QString l_data = m_sharedMemory.Read(); // 从共享内存读取数据
-	QStringList l_dataList = l_data.split(",");
+	// 从队列中读取数据
+	QString l_data = m_sharedMemory.Dequeue();
 
 	QueryPerformanceCounter(&m_end);
 	double l_dInterval = static_cast<double>(m_end.QuadPart - m_start.QuadPart) * 1000 / m_frequency.QuadPart;
 	std::cout << "读取运行时间： " << l_dInterval << " ms" << std::endl;
 
-	if (l_dataList.isEmpty()) {
+	if (l_data.isEmpty()) {
 		qDebug() << "A:No data found in shared memory.";
 	}
 	else {
-		qDebug() << "A:Data read from shared memory, total count: " << l_dataList.size();
-		ui.valueOutput->setText(l_dataList.join(",")); // 显示所有读取的数据
+		qDebug() << "A:Data read from shared memory: " << l_data;
+		ui.readTextEdit->setPlainText(l_data);
 	}
 
-	g_iSharedMemoryMessages--;
-	// 获取当前行数，并在末尾插入一行
-	int newRow = ui.memoryBlockTable->rowCount();
-	ui.memoryBlockTable->insertRow(newRow);
+	// 更新表格
+	int l_iNewRow = ui.memoryBlockTable->rowCount();
+	ui.memoryBlockTable->insertRow(l_iNewRow);
+	size_t l_szDataSize = m_sharedMemory.GetQueueSize();
+	QByteArray l_byteArray = l_data.toUtf8();
+	int l_iByteSize = l_byteArray.size();
 
-	// 将数据填入新增的行
 	m_shared = new QTableWidgetItem(QString::number(m_iMaxSharedMemory));
-	m_numberOfEntries = new QTableWidgetItem(QString::number(m_iNumberOfEntries));
-	m_byte = new QTableWidgetItem(QString::number(m_iByte));
+	m_numberOfEntries = new QTableWidgetItem(QString::number(l_szDataSize));
+	m_byte = new QTableWidgetItem(QString::number(l_iByteSize));
 	m_time = new QTableWidgetItem(QString::number(l_dInterval));
-	ui.memoryBlockTable->setItem(newRow, 0, m_shared);
-	ui.memoryBlockTable->setItem(newRow, 1, m_numberOfEntries);
-	ui.memoryBlockTable->setItem(newRow, 2, m_byte);
-	ui.memoryBlockTable->setItem(newRow, 3, m_time);
-}
 
-void ProcessB::onWriteButtonClicked() {
-	double l_dTotalTime = 0.0;   // 记录总时间
-	QStringList l_dataToWrite;
-
-	// 生成随机数据（每次生成相同的大小）
-	for (int i = 0; i < m_iNumberOfEntries; ++i) {
-		QString randomData = generateRandomString(m_iByte);  // 每条随机数据
-		l_dataToWrite.append(randomData);
-	}
-
-	QString l_dataString = l_dataToWrite.join(",");  // 将所有数据合并成一个大字符串
-
-	LARGE_INTEGER frequency, start, end;
-	QueryPerformanceFrequency(&frequency);  // 获取频率
-
-	for (int run = 0; run < l_iTestRuns; ++run) {
-
-		// 开始计时
-		QueryPerformanceCounter(&start);
-
-		// 执行写入操作
-		m_sharedMemory.Write(l_dataString);
-
-		// 结束计时
-		QueryPerformanceCounter(&end);
-
-		// 计算运行时间 (毫秒)
-		double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
-		std::cout << "运行时间 (" << run + 1 << "): " << interval << " ms" << std::endl;
-
-		l_dTotalTime += interval;  // 累加时间
-	}
-	g_iSharedMemoryMessages++;
-	// 计算平均时间
-	double l_dAverageTime = l_dTotalTime / l_iTestRuns;
-	std::cout << "平均写入时间: " << l_dAverageTime << " ms" << std::endl;
-	// 获取当前行数，并在末尾插入一行
-	int newRow = ui.memoryBlockTable->rowCount();
-	ui.memoryBlockTable->insertRow(newRow);
-
-	// 将数据填入新增的行
-	m_shared = new QTableWidgetItem(QString::number(m_iMaxSharedMemory));
-	m_numberOfEntries = new QTableWidgetItem(QString::number(m_iNumberOfEntries));
-	m_byte = new QTableWidgetItem(QString::number(m_iByte));
-	m_time = new QTableWidgetItem(QString::number(l_dAverageTime));
-	ui.memoryBlockTable->setItem(newRow, 0, m_shared);
-	ui.memoryBlockTable->setItem(newRow, 1, m_numberOfEntries);
-	ui.memoryBlockTable->setItem(newRow, 2, m_byte);
-	ui.memoryBlockTable->setItem(newRow, 3, m_time);
-}
-
-double ProcessB::getMemoryUsage() {
-	MEMORYSTATUSEX l_memoryStatus;
-	l_memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
-
-	// 获取内存状态
-	if (GlobalMemoryStatusEx(&l_memoryStatus)) {
-		double l_dTotalMemory = l_memoryStatus.ullTotalPhys; // 物理内存总量
-		double l_dFreeMemory = l_memoryStatus.ullAvailPhys;  // 可用物理内存
-
-		// 计算已用内存的百分比
-		double l_dUsedMemory = l_dTotalMemory - l_dFreeMemory;
-		return (l_dUsedMemory / l_dTotalMemory) * 100.0;
-	}
-	return 0.0; // 获取内存状态失败
-}
-
-QString ProcessB::generateRandomString(int l_iLength) {
-	const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-	QString randomString;
-	for (int i = 0; i < l_iLength; ++i) {
-		int index = rand() % possibleCharacters.length();
-		randomString.append(possibleCharacters.at(index));
-	}
-	return randomString;
+	ui.memoryBlockTable->setItem(l_iNewRow, 0, m_shared);
+	ui.memoryBlockTable->setItem(l_iNewRow, 1, m_numberOfEntries);
+	ui.memoryBlockTable->setItem(l_iNewRow, 2, m_byte);
+	ui.memoryBlockTable->setItem(l_iNewRow, 3, m_time);
+	ui.memoryBlockTable->scrollToBottom();
 }

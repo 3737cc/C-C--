@@ -1,7 +1,5 @@
 #include "Process.h"
 
-int g_iSharedMemoryMessages = 0;
-
 Process::Process(QWidget* parent)
 	: QMainWindow(parent)
 	, m_sharedMemory("SharedMemoryKey")
@@ -12,9 +10,14 @@ Process::Process(QWidget* parent)
 
 	QObject::connect(ui.readButton, &QPushButton::clicked, this, &Process::onReadButtonClicked);
 	QObject::connect(ui.writeButton, &QPushButton::clicked, this, &Process::onWriteButtonClicked);
-
+	QObject::connect(ui.createButton, &QPushButton::clicked, this, &Process::onCreateOrOpenClicked);
 	setWindowTitle("Memory Usage Monitor");
 
+	ui.memoryBlockTable->setRowCount(0);
+	ui.memoryBlockTable->setColumnCount(4);
+}
+
+void Process::onCreateOrOpenClicked() {
 	// 创建并初始化队列
 	if (!m_sharedMemory.Create(m_iMaxSharedMemory)) {
 		qDebug() << "Failed to create shared memory.";
@@ -25,9 +28,48 @@ Process::Process(QWidget* parent)
 			qDebug() << "Failed to initialize queue.";
 		}
 	}
+}
 
-	ui.memoryBlockTable->setRowCount(0);
-	ui.memoryBlockTable->setColumnCount(4);
+void Process::onWriteButtonClicked() {
+	if (m_sharedMemory.IsFull()) {
+		QMessageBox::warning(this, "Warning", "Queue is full!");
+		return;
+	}
+
+	double l_dTotalTime = 0.0;
+	QString l_dataString = ui.sendTextEdit->toPlainText();
+
+	LARGE_INTEGER frequency, start, end;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&start);
+
+	// 将数据入队
+	if (!m_sharedMemory.Enqueue(l_dataString)) {
+		QMessageBox::warning(this, "Error", "Failed to write to queue!");
+		return;
+	}
+
+	QueryPerformanceCounter(&end);
+	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
+	std::cout << "运行时间 " << interval << " ms" << std::endl;
+
+	// 更新表格
+	int l_iNewRow = ui.memoryBlockTable->rowCount();
+	ui.memoryBlockTable->insertRow(l_iNewRow);
+	size_t l_szDataSize = m_sharedMemory.GetQueueSize();
+	QByteArray l_byteArray = l_dataString.toUtf8();
+	int l_iByteSize = l_byteArray.size();
+
+	m_shared = new QTableWidgetItem(QString::number(m_iMaxSharedMemory));
+	m_numberOfEntries = new QTableWidgetItem(QString::number(l_szDataSize));
+	m_byte = new QTableWidgetItem(QString::number(l_iByteSize));
+	m_time = new QTableWidgetItem(QString::number(interval));
+
+	ui.memoryBlockTable->setItem(l_iNewRow, 0, m_shared);
+	ui.memoryBlockTable->setItem(l_iNewRow, 1, m_numberOfEntries);
+	ui.memoryBlockTable->setItem(l_iNewRow, 2, m_byte);
+	ui.memoryBlockTable->setItem(l_iNewRow, 3, m_time);
+	ui.memoryBlockTable->scrollToBottom();
 }
 
 void Process::onReadButtonClicked() {
@@ -65,48 +107,6 @@ void Process::onReadButtonClicked() {
 	m_numberOfEntries = new QTableWidgetItem(QString::number(l_szDataSize));
 	m_byte = new QTableWidgetItem(QString::number(l_iByteSize));
 	m_time = new QTableWidgetItem(QString::number(l_dInterval));
-
-	ui.memoryBlockTable->setItem(l_iNewRow, 0, m_shared);
-	ui.memoryBlockTable->setItem(l_iNewRow, 1, m_numberOfEntries);
-	ui.memoryBlockTable->setItem(l_iNewRow, 2, m_byte);
-	ui.memoryBlockTable->setItem(l_iNewRow, 3, m_time);
-	ui.memoryBlockTable->scrollToBottom();
-}
-
-void Process::onWriteButtonClicked() {
-	if (m_sharedMemory.IsFull()) {
-		QMessageBox::warning(this, "Warning", "Queue is full!");
-		return;
-	}
-
-	double l_dTotalTime = 0.0;
-	QString l_dataString = ui.sendTextEdit->toPlainText();
-
-	LARGE_INTEGER frequency, start, end;
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&start);
-
-	// 将数据入队
-	if (!m_sharedMemory.Enqueue(l_dataString)) {
-		QMessageBox::warning(this, "Error", "Failed to write to queue!");
-		return;
-	}
-
-	QueryPerformanceCounter(&end);
-	double interval = static_cast<double>(end.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
-	std::cout << "运行时间 " << interval << " ms" << std::endl;
-
-	// 更新表格
-	int l_iNewRow = ui.memoryBlockTable->rowCount();
-	ui.memoryBlockTable->insertRow(l_iNewRow);
-	size_t l_szDataSize = m_sharedMemory.GetQueueSize();
-	QByteArray l_byteArray = l_dataString.toUtf8();
-	int l_iByteSize = l_byteArray.size();
-
-	m_shared = new QTableWidgetItem(QString::number(m_iMaxSharedMemory));
-	m_numberOfEntries = new QTableWidgetItem(QString::number(l_szDataSize));
-	m_byte = new QTableWidgetItem(QString::number(l_iByteSize));
-	m_time = new QTableWidgetItem(QString::number(interval));
 
 	ui.memoryBlockTable->setItem(l_iNewRow, 0, m_shared);
 	ui.memoryBlockTable->setItem(l_iNewRow, 1, m_numberOfEntries);

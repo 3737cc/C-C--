@@ -33,7 +33,7 @@
     <item>
      <widget class="QPushButton" name="createButton">
       <property name="text">
-       <string>创建或打开共享内存</string>
+       <string>创建或连接共享内存</string>
       </property>
      </widget>
     </item>

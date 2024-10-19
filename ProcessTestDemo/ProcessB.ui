@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>408</width>
-    <height>413</height>
+    <width>480</width>
+    <height>480</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>ProcessB</string>
@@ -16,24 +22,26 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="valueInputLabel">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>传输的值：</string>
+       <string>共享内存通信：</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::RichText</enum>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="valueInput"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="valueOutputLabel">
+     <widget class="QPushButton" name="createButton">
       <property name="text">
-       <string>读取的值：</string>
+       <string>创建或连接共享内存</string>
       </property>
      </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="valueOutput"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -62,7 +70,7 @@
       </column>
       <column>
        <property name="text">
-        <string>数据数量</string>
+        <string>消息数量</string>
        </property>
       </column>
       <column>
@@ -76,6 +84,26 @@
        </property>
       </column>
      </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueInputLabel">
+      <property name="text">
+       <string>数据发送：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="sendTextEdit"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="valueOutputLabel">
+      <property name="text">
+       <string>数据接受：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="readTextEdit"/>
     </item>
    </layout>
   </widget>
