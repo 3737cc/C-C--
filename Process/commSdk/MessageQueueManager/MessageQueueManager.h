@@ -39,6 +39,9 @@ public:
 	// 获取最大消息数量
 	size_t getMaxMessages() const;
 
+	//释放资源
+	void remove();
+
 private:
 	message_queue* m_messageQueue;
 	size_t m_maxMessageSize;

@@ -21,15 +21,15 @@ private slots:
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
 
-	//std::string generateRandomSring(size_t length);
+	std::string generateRandomSring(size_t length);
 
-	//void startAutoSending();
-	//void autoSendMessage();
-	//void onStartAutoSendingClicked();
-	//void startAutoReading();
-	//void autoReadMessage();
-	//void onStartAutoReadingClicked();
-	//void stopAuto();
+	void startAutoSending();
+	void autoSendMessage();
+	void onStartAutoSendingClicked();
+	void startAutoReading();
+	void autoReadMessage();
+	void onStartAutoReadingClicked();
+	void stopAuto();
 
 private:
 	Ui::MessageQueuesClass ui;
