@@ -8,7 +8,7 @@
 #include <QMessageBox>
 #include <random>
 #include <QTimer>
-#include <commSdk\MessageQueueManager\MessageQueueManager.h>
+#include "commSdk/MessageQueueManager/MessageQueueManager.h"
 
 class MessageQueuesB : public QMainWindow
 {

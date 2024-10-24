@@ -114,6 +114,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MessageQueueManager.cpp" />
     <ClCompile Include="MessageQueues.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -134,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MessageQueuesB.h" />
+    <ClInclude Include="MessageQueueManager.h" />
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="MessageQueues.h" />

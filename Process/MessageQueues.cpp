@@ -12,12 +12,9 @@ MessageQueues::MessageQueues(QWidget* parent)
 {
 	ui.setupUi(this);
 
-	//message_queue::remove("message_queue");
-	// 初始化消息队列管理器
-	if (!m_queueManager.initialize("messageQueue", m_iMaxQueueMessages, m_iMaxByte)) {
-		QMessageBox::critical(this, "Error", "Failed to initialize message queue!");
-	}
+	//message_queue::remove("message_queue")
 
+	connect(ui.connectButton, &QPushButton::clicked, this, &MessageQueues::onConnectButtonClicked);
 	connect(ui.writeButton, &QPushButton::clicked, this, &MessageQueues::onWriteButtonClicked);
 	connect(ui.readButton, &QPushButton::clicked, this, &MessageQueues::onReadButtonClicked);
 	connect(ui.autoWriteButton, &QPushButton::clicked, this, &MessageQueues::onStartAutoSendingClicked);
@@ -29,7 +26,30 @@ MessageQueues::MessageQueues(QWidget* parent)
 }
 
 MessageQueues::~MessageQueues() {
-	//m_queueManager.remove();
+	/*m_queueManager.Disconnect();*/
+}
+
+void MessageQueues::onConnectButtonClicked() {
+	QString i_name = ui.nameLineEdit->text();
+
+	if (m_bConnected) {
+		// 如果已经连接，执行断开连接操作
+		m_queueManager.Disconnect();
+		ui.connectButton->setText(QString::fromLocal8Bit("连接"));
+		QMessageBox::information(this, QString::fromLocal8Bit("信息"), QString::fromLocal8Bit("已断开连接!"));
+		m_bConnected = false;  // 更新连接状态
+	}
+	else {
+		// 如果未连接，执行连接操作
+		if (!m_queueManager.Connect(i_name.toUtf8().constData(), m_iMaxQueueMessages, m_iMaxByte)) {
+			QMessageBox::critical(this, QString::fromLocal8Bit("错误"), QString::fromLocal8Bit("初始化消息队列失败!"));
+		}
+		else {
+			ui.connectButton->setText(QString::fromLocal8Bit("断开连接"));
+			QMessageBox::information(this, QString::fromLocal8Bit("信息"), QString::fromLocal8Bit("已连接到消息队列"));
+			m_bConnected = true;  // 更新连接状态
+		}
+	}
 }
 
 void MessageQueues::onWriteButtonClicked()
@@ -55,7 +75,7 @@ void MessageQueues::onWriteButtonClicked()
 	QueryPerformanceFrequency(&m_frequency);
 	QueryPerformanceCounter(&m_start);
 	try {
-		m_queueManager.sendMessage(inputMessage);
+		m_queueManager.SendData(inputMessage);
 	}
 	catch (const interprocess_exception& ex) {
 		QMessageBox::critical(this, "Error",
@@ -184,7 +204,7 @@ void MessageQueues::autoSendMessage()
 		QueryPerformanceFrequency(&m_frequency);
 		QueryPerformanceCounter(&m_start);
 		try {
-			m_queueManager.sendMessage(l_szRandomMessage);
+			m_queueManager.SendData(l_szRandomMessage);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",

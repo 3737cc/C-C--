@@ -8,7 +8,7 @@
 #include <QMessageBox>
 #include <random>
 #include <QTimer>
-#include <commSdk\MessageQueueManager\MessageQueueManager.h>
+#include "MessageQueueManager.h"
 
 class MessageQueues : public QMainWindow
 {
@@ -18,6 +18,8 @@ public:
 	~MessageQueues();
 
 private slots:
+	void onConnectButtonClicked();
+
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
 
@@ -34,6 +36,7 @@ private slots:
 private:
 	Ui::MessageQueuesClass ui;
 	MessageQueueManager m_queueManager;
+	bool m_bConnected = false;//跟踪连接状态
 	LARGE_INTEGER m_frequency; // 计时器频率
 	LARGE_INTEGER m_start, m_end; // 计时器值
 	QTimer* m_timerSend;  // 定时器成员变量
