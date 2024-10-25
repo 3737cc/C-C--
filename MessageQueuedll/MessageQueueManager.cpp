@@ -4,30 +4,32 @@ MessageQueueManager::MessageQueueManager()
 	: m_messageQueue(nullptr)
 	, m_maxMessageSize(0)
 	, m_maxMessages(0)
-	, m_initialized(false)
+	, m_bInitialized(false)
+	, m_chMessageQueue("messageQueue")
 {
 }
 
 MessageQueueManager::~MessageQueueManager()
 {
 	if (m_messageQueue) {
-		message_queue::remove("message_queue");
+		message_queue::remove(m_chMessageQueue);
 		delete m_messageQueue;
 		m_messageQueue = nullptr;
 	}
 }
 
-bool MessageQueueManager::initialize(const char* queueName, size_t maxMessages, size_t maxMessageSize)
+bool MessageQueueManager::Connect(const char* queueName, size_t maxMessages, size_t maxMessageSize)
 {
-	if (m_initialized) {
+	m_chMessageQueue = queueName;
+	if (m_bInitialized) {
 		return false;
 	}
 
 	try {
-		m_messageQueue = new message_queue(open_or_create, queueName, maxMessages, maxMessageSize);
+		m_messageQueue = new message_queue(open_or_create, m_chMessageQueue, maxMessages, maxMessageSize);
 		m_maxMessageSize = maxMessageSize;
 		m_maxMessages = maxMessages;
-		m_initialized = true;
+		m_bInitialized = true;
 		return true;
 	}
 	catch (const interprocess_exception&) {
@@ -36,9 +38,22 @@ bool MessageQueueManager::initialize(const char* queueName, size_t maxMessages, 
 	}
 }
 
-bool MessageQueueManager::sendMessage(const std::string& message)
+bool MessageQueueManager::Disconnect() {
+	if (m_messageQueue) {
+		// 先移除消息队列
+		message_queue::remove(m_chMessageQueue);
+
+		// 然后删除消息队列对象
+		delete m_messageQueue;
+		m_messageQueue = nullptr; // 将指针设为 nullptr，避免悬空指针
+	}
+	m_bInitialized = false;
+	return true; // 返回值可以根据需要调整
+}
+
+bool MessageQueueManager::sendData(const std::string& message)
 {
-	if (!m_initialized || !m_messageQueue) {
+	if (!m_bInitialized || !m_messageQueue) {
 		return false;
 	}
 
@@ -57,7 +72,7 @@ bool MessageQueueManager::sendMessage(const std::string& message)
 
 bool MessageQueueManager::receiveMessage(std::vector<char>& buffer, size_t& receivedSize)
 {
-	if (!m_initialized || !m_messageQueue) {
+	if (!m_bInitialized || !m_messageQueue) {
 		return false;
 	}
 
@@ -74,7 +89,7 @@ bool MessageQueueManager::receiveMessage(std::vector<char>& buffer, size_t& rece
 
 unsigned int MessageQueueManager::getMessageCount() const
 {
-	return m_initialized ? m_messageQueue->get_num_msg() : 0;
+	return m_bInitialized ? m_messageQueue->get_num_msg() : 0;
 }
 
 size_t MessageQueueManager::getMaxMessageSize() const
@@ -84,7 +99,7 @@ size_t MessageQueueManager::getMaxMessageSize() const
 
 bool MessageQueueManager::isInitialized() const
 {
-	return m_initialized;
+	return m_bInitialized;
 }
 
 size_t MessageQueueManager::getMaxMessages() const

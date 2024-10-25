@@ -18,11 +18,14 @@ public:
 	MessageQueueManager();
 	virtual ~MessageQueueManager();
 
-	// 初始化消息队列
-	bool initialize(const char* queueName, size_t maxMessages, size_t maxMessageSize);
+	// 创建消息队列
+	bool Connect(const char* queueName, size_t maxMessages, size_t maxMessageSize);
+
+	//释放资源
+	bool Disconnect();
 
 	// 发送消息
-	bool sendMessage(const std::string& message);
+	bool sendData(const std::string& message);
 
 	// 读取消息
 	bool receiveMessage(std::vector<char>& buffer, size_t& receivedSize);
@@ -43,7 +46,8 @@ private:
 	message_queue* m_messageQueue;
 	size_t m_maxMessageSize;
 	size_t m_maxMessages;
-	bool m_initialized;
+	bool m_bInitialized;
+	const char* m_chMessageQueue;
 };
 
 #endif // MESSAGE_QUEUE_MANAGER_H
