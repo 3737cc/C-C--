@@ -18,14 +18,14 @@ public:
 	MessageQueueManager();
 	virtual ~MessageQueueManager();
 
-	// 初始化消息队列
+	// 创建消息队列
 	bool Connect(const char* queueName, size_t maxMessages, size_t maxMessageSize);
 
 	//释放资源
 	bool Disconnect();
 
 	// 发送消息
-	bool SendData(const std::string& message);
+	bool sendData(const std::string& message);
 
 	// 读取消息
 	bool receiveMessage(std::vector<char>& buffer, size_t& receivedSize);

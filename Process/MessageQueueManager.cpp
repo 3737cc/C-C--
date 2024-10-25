@@ -51,7 +51,7 @@ bool MessageQueueManager::Disconnect() {
 	return true; // 返回值可以根据需要调整
 }
 
-bool MessageQueueManager::SendData(const std::string& message)
+bool MessageQueueManager::sendData(const std::string& message)
 {
 	if (!m_bInitialized || !m_messageQueue) {
 		return false;

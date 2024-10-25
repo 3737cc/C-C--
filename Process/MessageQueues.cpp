@@ -75,7 +75,7 @@ void MessageQueues::onWriteButtonClicked()
 	QueryPerformanceFrequency(&m_frequency);
 	QueryPerformanceCounter(&m_start);
 	try {
-		m_queueManager.SendData(inputMessage);
+		m_queueManager.sendData(inputMessage);
 	}
 	catch (const interprocess_exception& ex) {
 		QMessageBox::critical(this, "Error",
@@ -204,7 +204,7 @@ void MessageQueues::autoSendMessage()
 		QueryPerformanceFrequency(&m_frequency);
 		QueryPerformanceCounter(&m_start);
 		try {
-			m_queueManager.SendData(l_szRandomMessage);
+			m_queueManager.sendData(l_szRandomMessage);
 		}
 		catch (const interprocess_exception& ex) {
 			QMessageBox::critical(this, "Error",
