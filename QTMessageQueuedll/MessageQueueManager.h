@@ -1,33 +1,41 @@
+// MessageQueueManager.h
 #ifndef MESSAGE_QUEUE_MANAGER_H
 #define MESSAGE_QUEUE_MANAGER_H
-
-#ifdef MESSAGEQUEUEAPI
-#define MESSAGEQUEUEAPI __declspec(dllexport)
-#else
-#define MESSAGEQUEUEAPI __declspec(dllimport)
-#endif
 
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <string>
 #include <vector>
 #include <chrono>
 #include <iostream>
-#include <QDateTime> 
+#include <QDateTime>
 #include<QTimer>
 #include <QObject> 
 
+#if defined(MESSAGEQUEUEAPI_EXPORTS)
+#define MESSAGEQUEUE_API __declspec(dllexport)
+#else
+#define MESSAGEQUEUE_API __declspec(dllimport)
+#endif
+
+// 声明元对象数据
+#if defined(MESSAGEQUEUEAPI_EXPORTS)
+class MESSAGEQUEUE_API MessageQueueManager;
+#else
+class MessageQueueManager;
+#endif
+
 using namespace boost::interprocess;
 
-class MESSAGEQUEUEAPI MessageQueueManager :public QObject {
+class MESSAGEQUEUE_API MessageQueueManager : public QObject {
 	Q_OBJECT
+
 public:
-	MessageQueueManager();
+	explicit MessageQueueManager(QObject* parent = nullptr);
 	virtual ~MessageQueueManager();
 
 	// 创建消息队列
 	bool Connect(const char* queueName, size_t maxMessages, size_t maxMessageSize);
-
-	//释放资源
+	// 释放资源
 	bool Disconnect();
 	// 发送消息
 	bool sendData(const std::string& message);
@@ -51,7 +59,6 @@ private:
 	void autoReceiveMessages();
 	bool hasMessages(); // 检查队列是否有消息
 	void processMessage(const std::vector<char>& buffer, size_t size);
-
 	size_t m_maxMessageSize;//最大消息大小
 	size_t m_maxMessages;//最多发送多少条消息
 	bool m_bInitialized;//判断连接的标志位
@@ -61,7 +68,7 @@ private:
 	bool m_hasPrintedEmptyMessage;
 
 signals:
-	void messageReceived(const QString& message);//发送信号
+	void messageReceived(const QString& message);
 };
 
 #endif // MESSAGE_QUEUE_MANAGER_H

@@ -22,9 +22,7 @@ private slots:
 
 	void onWriteButtonClicked();
 	void onReadButtonClicked();
-
 	std::string generateRandomSring(size_t length);
-
 	void startAutoSending();
 	void autoSendMessage();
 	void onStartAutoSendingClicked();
@@ -32,6 +30,7 @@ private slots:
 	void autoReadMessage();
 	void onStartAutoReadingClicked();
 	void stopAuto();
+	void updateTextEdit(const QString& message);
 
 private:
 	Ui::MessageQueuesClass ui;

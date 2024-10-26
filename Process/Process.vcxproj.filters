@@ -60,9 +60,6 @@
     <ClInclude Include="Signal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageQueueManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ProcessB.h">
@@ -72,6 +69,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="MessageQueuesB.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MessageQueueManager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

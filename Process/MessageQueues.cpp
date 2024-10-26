@@ -21,6 +21,10 @@ MessageQueues::MessageQueues(QWidget* parent)
 	connect(ui.autoReadButton, &QPushButton::clicked, this, &MessageQueues::onStartAutoReadingClicked);
 	connect(ui.stopButton, &QPushButton::clicked, this, &MessageQueues::stopAuto);
 
+	connect(&m_queueManager, &MessageQueueManager::messageReceived, this, &MessageQueues::updateTextEdit);
+
+	m_queueManager.startAutoReceive(100);
+
 	ui.memoryBlockTable->setRowCount(0);
 	ui.memoryBlockTable->setColumnCount(5);
 }
@@ -332,8 +336,19 @@ void MessageQueues::onStartAutoReadingClicked()
 
 void MessageQueues::stopAuto()
 {
-	m_timerSend->stop();
-	m_timerRead->stop();  // 停止定时器
+	// 检查并停止发送定时器
+	if (m_timerSend) {
+		m_timerSend->stop();
+		delete m_timerSend; // 如果不再需要，删除定时器对象
+		m_timerSend = nullptr; // 避免悬空指针
+	}
+
+	// 检查并停止读取定时器
+	if (m_timerRead) {
+		m_timerRead->stop();
+		delete m_timerRead; // 如果不再需要，删除定时器对象
+		m_timerRead = nullptr; // 避免悬空指针
+	}
 }
 
 //生成随机字符串
@@ -351,4 +366,8 @@ std::string MessageQueues::generateRandomSring(size_t length) {
 	}
 
 	return l_Result;
+}
+
+void MessageQueues::updateTextEdit(const QString& message) {
+	ui.readPlainTextEdit->setPlainText(message);
 }

@@ -1,6 +1,6 @@
 #include "MessageQueueManager.h"
 
-MessageQueueManager::MessageQueueManager()
+MessageQueueManager::MessageQueueManager(QObject* parent)
 	: m_messageQueue(nullptr)
 	, m_maxMessageSize(1024)
 	, m_maxMessages(10000)

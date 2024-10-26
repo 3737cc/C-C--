@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MessageQueuesB.h" />
-    <ClInclude Include="MessageQueueManager.h" />
+    <QtMoc Include="MessageQueueManager.h" />
     <ClInclude Include="Signal.h" />
     <QtMoc Include="ProcessB.h" />
     <QtMoc Include="MessageQueues.h" />
