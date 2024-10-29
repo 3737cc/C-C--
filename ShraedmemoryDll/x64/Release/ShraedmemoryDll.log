@@ -1,49 +1,53 @@
-﻿  SharedMemory.cpp
+﻿   Qt/MSBuild: 3.3.0.13
+  Reading Qt configuration (C:/Qt/5.15.2/msvc2019_64/bin/qmake)
+   Qt: 5.15.2
+  SharedMemory.cpp
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(11,1): warning C4005: “SHAREDMEMORYAPI”: 宏重定义
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp : message : 参见“SHAREDMEMORYAPI”的前一个定义
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(5,2): warning C4273: “SharedMemory::SharedMemory”: dll 链接不一致
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(25,2): message : 参见“{ctor}”的前一个定义
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(13,31): warning C4273: “SharedMemory::~SharedMemory”: dll 链接不一致
 E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(26,3): message : 参见“{dtor}”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(18,37): warning C4273: “SharedMemory::Create”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(29,7): message : 参见“Create”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(22,17): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(41,43): warning C4273: “SharedMemory::UpdateMemoryPointers”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(63,7): message : 参见“UpdateMemoryPointers”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(47,45): warning C4273: “SharedMemory::InitializeMemoryLayout”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(60,7): message : 参见“InitializeMemoryLayout”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(54,56): warning C4273: “SharedMemory::InitializeQueue”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(41,7): message : 参见“InitializeQueue”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(68,49): warning C4273: “SharedMemory::Enqueue”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(42,7): message : 参见“Enqueue”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(93,33): warning C4273: “SharedMemory::Dequeue”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(43,10): message : 参见“Dequeue”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(111,36): warning C4273: “SharedMemory::IsEmpty”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(44,7): message : 参见“IsEmpty”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(115,35): warning C4273: “SharedMemory::IsFull”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(45,7): message : 参见“IsFull”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(119,43): warning C4273: “SharedMemory::GetQueueSize”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(46,9): message : 参见“GetQueueSize”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(123,48): warning C4273: “SharedMemory::GetAvailableSpace”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(47,9): message : 参见“GetAvailableSpace”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(128,40): warning C4273: “SharedMemory::Resize”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(30,7): message : 参见“Resize”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(134,29): warning C4273: “SharedMemory::Detach”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(32,7): message : 参见“Detach”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(142,29): warning C4273: “SharedMemory::Attach”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(31,7): message : 参见“Attach”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(152,30): warning C4273: “SharedMemory::Read”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(34,10): message : 参见“Read”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(156,47): warning C4273: “SharedMemory::Write”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(33,7): message : 参见“Write”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(160,34): warning C4273: “SharedMemory::getAddress”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(35,8): message : 参见“getAddress”的前一个定义
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(164,32): warning C4273: “SharedMemory::getSize”: dll 链接不一致
-E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(36,9): message : 参见“getSize”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(17,47): warning C4273: “SharedMemory::setKey”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(28,7): message : 参见“setKey”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(21,37): warning C4273: “SharedMemory::Create”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(30,7): message : 参见“Create”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(25,17): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(44,43): warning C4273: “SharedMemory::UpdateMemoryPointers”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(64,7): message : 参见“UpdateMemoryPointers”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(50,45): warning C4273: “SharedMemory::InitializeMemoryLayout”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(61,7): message : 参见“InitializeMemoryLayout”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(57,56): warning C4273: “SharedMemory::InitializeQueue”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(42,7): message : 参见“InitializeQueue”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(71,49): warning C4273: “SharedMemory::Enqueue”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(43,7): message : 参见“Enqueue”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(96,33): warning C4273: “SharedMemory::Dequeue”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(44,10): message : 参见“Dequeue”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(114,36): warning C4273: “SharedMemory::IsEmpty”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(45,7): message : 参见“IsEmpty”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(118,35): warning C4273: “SharedMemory::IsFull”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(46,7): message : 参见“IsFull”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(122,43): warning C4273: “SharedMemory::GetQueueSize”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(47,9): message : 参见“GetQueueSize”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(126,48): warning C4273: “SharedMemory::GetAvailableSpace”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(48,9): message : 参见“GetAvailableSpace”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(131,40): warning C4273: “SharedMemory::Resize”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(31,7): message : 参见“Resize”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(137,29): warning C4273: “SharedMemory::Detach”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(33,7): message : 参见“Detach”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(145,29): warning C4273: “SharedMemory::Attach”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(32,7): message : 参见“Attach”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(155,30): warning C4273: “SharedMemory::Read”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(35,10): message : 参见“Read”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(159,47): warning C4273: “SharedMemory::Write”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(34,7): message : 参见“Write”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(163,34): warning C4273: “SharedMemory::getAddress”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(36,8): message : 参见“getAddress”的前一个定义
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.cpp(167,32): warning C4273: “SharedMemory::getSize”: dll 链接不一致
+E:\C++_Test\Communication\ShraedmemoryDll\SharedMemory.h(37,9): message : 参见“getSize”的前一个定义
     正在创建库 E:\C++_Test\Communication\ShraedmemoryDll\x64\Release\ShraedmemoryDll.lib 和对象 E:\C++_Test\Communication\ShraedmemoryDll\x64\Release\ShraedmemoryDll.exp
   正在生成代码
-  1 of 19 functions ( 5.3%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  Previous IPDB not found, fall back to full compilation.
+  All 20 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
   ShraedmemoryDll.vcxproj -> E:\C++_Test\Communication\ShraedmemoryDll\x64\Release\ShraedmemoryDll.dll

@@ -25,6 +25,7 @@ public:
 	SharedMemory(const QString& key);
 	~SharedMemory();
 
+	void setKey(const QString& key);
 	// 原有接口
 	bool Create(int size);
 	bool Resize(int newSize);

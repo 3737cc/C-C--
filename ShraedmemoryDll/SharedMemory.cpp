@@ -14,6 +14,9 @@ SharedMemory::~SharedMemory() {
 	Detach(); // 释放共享内存
 }
 
+void SharedMemory::setKey(const QString& key) {
+	m_sharedMemory.setKey(key);
+}
 
 bool SharedMemory::Create(int size) {
 	// 确保size足够大以容纳队列头部信息
