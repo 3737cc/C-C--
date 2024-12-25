@@ -1,3 +1,76 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include "DspFilters/Dsp.h"
+#include "DspFilters/CoefficientRecovery.h"
+#include "opencv2/opencv.hpp"
+#include "imfilter.h"
+#include "fstream"
+#include "VideoProcessor.h"
+
+
+// 将 OpenCV 类型编码转换为可读字符串的函数
+std::string getMatTypeName(int type) {
+	// 获取数据深度
+	int depth = type & CV_MAT_DEPTH_MASK;
+	std::string depthStr;
+
+	switch (depth) {
+	case CV_8U:  depthStr = "CV_8U"; break;
+	case CV_8S:  depthStr = "CV_8S"; break;
+	case CV_16U: depthStr = "CV_16U"; break;
+	case CV_16S: depthStr = "CV_16S"; break;
+	case CV_32S: depthStr = "CV_32S"; break;
+	case CV_32F: depthStr = "CV_32F"; break;
+	case CV_64F: depthStr = "CV_64F"; break;
+	default:     depthStr = "Unknown"; break;
+	}
+
+	// 获取通道数
+	int channels = 1 + (type >> CV_CN_SHIFT);
+	return depthStr + "C" + std::to_string(channels);
+}
+using namespace Dsp;
+
+int main() {
+	VideoProcessor* pVideoProcessor;
+	pVideoProcessor = new VideoProcessor;
+	// 图像参数
+	std::vector<cv::Mat> i_vPreFrames;		// 图像原始数据
+	std::vector<cv::Mat> i_processedFrames;	// 图像处理后的数据保存
+	std::vector<cv::Mat> i_ntscFrames;		// NTSC
+	std::vector<cv::Mat> i_rgbFrames;		// RGB
+	std::vector<cv::Mat> i_magnitudeFrames;	// 幅度谱视频帧所有原始数据
+	std::vector<cv::Mat> i_phaseFrames;		// 相位谱视频帧所有数据
+	int i_iFrameWidth = 0;					// 视频宽度
+	int i_iFrameHeight = 0;					// 视频高度
+	int i_iFrames = 0;						// 总帧数
+	int i_dFps = 0;							// 帧率
+	cv::Mat i_rgbFrame, i_ntscFrame;		// 当前帧
+	// 设置视频路径
+	std::string videoPath = "f11.avi";
+	// 加载视频
+	if (!pVideoProcessor->LoadVideo(videoPath)) {
+		return -1;
+	}
+	//处理视频
+	i_vPreFrames = pVideoProcessor->GetImage();
+	// 遍历每一帧图像并进行处理
+	for (size_t i = 0; i < i_vPreFrames.size(); ++i) {
+		// RGB->NTSC
+		cv::Mat i_ntscFrame = pVideoProcessor->RGBtoYIQ(i_vPreFrames[i]);
+		i_ntscFrames.push_back(i_ntscFrame);
+		// NTSC->RGB
+		cv::Mat i_rgbFrame = pVideoProcessor->RGBtoYIQ(i_vPreFrames[i]);
+		i_rgbFrames.push_back(i_rgbFrame);
+	}
+	// 保存为RGB格式
+	std::string outputPath = "RBG.avi";
+	if (!pVideoProcessor->ExportVideo(outputPath, i_rgbFrames)) {
+		return -1;
+	}
+	return 0;
+}
 
 //// 更改阶数
 //constexpr int FilterOrder = 10;
